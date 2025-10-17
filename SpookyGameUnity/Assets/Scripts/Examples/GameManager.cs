@@ -27,34 +27,12 @@ namespace SpookyGame.Examples
         
         private void OnApplicationPause(bool pauseStatus)
         {
-            // 检查 EventBus 是否已初始化
-            if (!EventBus.IsInitialized) return;
-            
-            // 处理应用暂停
-            if (pauseStatus)
-            {
-                EventBus.Publish(new GameStateChangedEvent(GameState.Paused, GameState.Exploring));
-            }
-            else
-            {
-                EventBus.Publish(new GameStateChangedEvent(GameState.Exploring, GameState.Paused));
-            }
+            // 暂停功能已移除，保留接口
         }
         
         private void OnApplicationFocus(bool hasFocus)
         {
-            // 检查 EventBus 是否已初始化
-            if (!EventBus.IsInitialized) return;
-            
-            // 处理应用失去焦点
-            if (!hasFocus)
-            {
-                EventBus.Publish(new GameStateChangedEvent(GameState.Paused, GameState.Exploring));
-            }
-            else
-            {
-                EventBus.Publish(new GameStateChangedEvent(GameState.Exploring, GameState.Paused));
-            }
+            // 暂停功能已移除，保留接口
         }
     }
 }

@@ -65,16 +65,8 @@ namespace SpookyGame.Input
                 _interactPressed = false;
             }
             
-            // 检查暂停输入 (ESC 键)
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Escape))
-            {
-                _pausePressed = true;
-                OnPausePressed?.Invoke();
-            }
-            else
-            {
-                _pausePressed = false;
-            }
+            // 检查暂停输入 (ESC 键) - 保留接口但不实现
+            _pausePressed = false;
         }
         
         /// <summary>

@@ -35,8 +35,7 @@ namespace SpookyGame.UI
             // 订阅游戏状态变化事件
             EventBus.Subscribe<GameStateChangedEvent>(this);
             
-            // 订阅输入事件
-            InputService.OnPausePressed += HandlePausePressed;
+            // 暂停功能已移除，保留接口
             
             // 绑定按钮事件
             if (resumeButton != null)
@@ -59,7 +58,8 @@ namespace SpookyGame.UI
         {
             // 取消订阅事件
             EventBus.Unsubscribe<GameStateChangedEvent>(this);
-            InputService.OnPausePressed -= HandlePausePressed;
+            
+            // 暂停功能已移除，保留接口
             
             // 解绑按钮事件
             if (resumeButton != null)
@@ -84,15 +84,7 @@ namespace SpookyGame.UI
         /// <param name="eventData">游戏状态变化事件数据</param>
         public void Handle(GameStateChangedEvent eventData)
         {
-            // 根据游戏状态更新暂停菜单显示
-            if (eventData.NewState == GameState.Paused)
-            {
-                ShowPauseMenu();
-            }
-            else if (eventData.NewState == GameState.Exploring || eventData.NewState == GameState.InPuzzle)
-            {
-                HidePauseMenu();
-            }
+            // 暂停功能已移除，保留接口
         }
         
         /// <summary>
@@ -100,14 +92,7 @@ namespace SpookyGame.UI
         /// </summary>
         private void HandlePausePressed()
         {
-            if (_isPaused)
-            {
-                ResumeGame();
-            }
-            else
-            {
-                PauseGame();
-            }
+            // 暂停功能已移除，保留接口
         }
         
         /// <summary>
@@ -115,15 +100,7 @@ namespace SpookyGame.UI
         /// </summary>
         public void PauseGame()
         {
-            if (_isPaused) return;
-            
-            _isPaused = true;
-            Time.timeScale = 0f;
-            
-            // 发布游戏状态变化事件
-            EventBus.Publish(new GameStateChangedEvent(GameState.Paused, GameState.Exploring));
-            
-            Debug.Log("[PauseMenu] Game paused");
+            // 暂停功能已移除，保留接口
         }
         
         /// <summary>
@@ -131,15 +108,7 @@ namespace SpookyGame.UI
         /// </summary>
         public void ResumeGame()
         {
-            if (!_isPaused) return;
-            
-            _isPaused = false;
-            Time.timeScale = 1f;
-            
-            // 发布游戏状态变化事件
-            EventBus.Publish(new GameStateChangedEvent(GameState.Exploring, GameState.Paused));
-            
-            Debug.Log("[PauseMenu] Game resumed");
+            // 暂停功能已移除，保留接口
         }
         
         /// <summary>
@@ -147,13 +116,7 @@ namespace SpookyGame.UI
         /// </summary>
         private void ShowPauseMenu()
         {
-            if (pausePanel != null)
-            {
-                pausePanel.SetActive(true);
-            }
-            
-            // 禁用输入
-            InputService.SetInputEnabled(false);
+            // 暂停功能已移除，保留接口
         }
         
         /// <summary>
@@ -161,13 +124,7 @@ namespace SpookyGame.UI
         /// </summary>
         private void HidePauseMenu()
         {
-            if (pausePanel != null)
-            {
-                pausePanel.SetActive(false);
-            }
-            
-            // 启用输入
-            InputService.SetInputEnabled(true);
+            // 暂停功能已移除，保留接口
         }
         
         /// <summary>
