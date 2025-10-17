@@ -3,29 +3,11 @@ using UnityEngine;
 namespace SpookyGame.Input
 {
     /// <summary>
-    /// 简化输入服务，只处理交互和暂停输入
+    /// 简化输入服务，用于点击式冒险游戏
     /// </summary>
     public static class InputService
     {
         private static bool _isInitialized = false;
-        
-        // 输入状态
-        private static bool _interactPressed;
-        private static bool _pausePressed;
-        
-        // 输入事件
-        public static System.Action OnInteractPressed;
-        public static System.Action OnPausePressed;
-        
-        /// <summary>
-        /// 是否按下交互键
-        /// </summary>
-        public static bool InteractPressed => _interactPressed;
-        
-        /// <summary>
-        /// 是否按下暂停键
-        /// </summary>
-        public static bool PausePressed => _pausePressed;
         
         /// <summary>
         /// 是否已初始化
@@ -44,29 +26,16 @@ namespace SpookyGame.Input
             }
             
             _isInitialized = true;
-            Debug.Log("[InputService] Initialized");
+            Debug.Log("[InputService] Initialized (Click-based adventure game mode)");
         }
         
         /// <summary>
-        /// 更新输入状态（每帧调用）
+        /// 更新输入状态（可选，点击式游戏可能不需要）
         /// </summary>
         public static void Update()
         {
             if (!_isInitialized) return;
-            
-            // 检查交互输入 (E 键)
-            if (UnityEngine.Input.GetKeyDown(KeyCode.E))
-            {
-                _interactPressed = true;
-                OnInteractPressed?.Invoke();
-            }
-            else
-            {
-                _interactPressed = false;
-            }
-            
-            // 检查暂停输入 (ESC 键) - 保留接口但不实现
-            _pausePressed = false;
+            // 点击式游戏主要通过 Interactor 处理输入
         }
         
         /// <summary>
@@ -76,7 +45,6 @@ namespace SpookyGame.Input
         public static void SetInputEnabled(bool enabled)
         {
             if (!_isInitialized) return;
-            
             Debug.Log($"[InputService] Input {(enabled ? "enabled" : "disabled")}");
         }
         

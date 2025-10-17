@@ -3,28 +3,25 @@ using UnityEngine;
 namespace SpookyGame.World
 {
     /// <summary>
-    /// 可交互对象的抽象基类
+    /// 可交互对象的抽象基类（点击式交互）
+    /// 会自动添加 Collider2D 组件用于鼠标检测
     /// </summary>
+    [RequireComponent(typeof(Collider2D))]
     public abstract class Interactable : MonoBehaviour
     {
         [Header("Interaction Settings")]
-        [SerializeField] protected string interactionPrompt = "按 E 交互";
-        [SerializeField] protected float interactionRange = 2f;
+        [SerializeField] protected string interactionPrompt = "点击交互";
         [SerializeField] protected bool canInteractMultipleTimes = true;
         [SerializeField] protected float interactionCooldown = 0.5f;
         
         protected bool _hasInteracted = false;
         protected float _lastInteractionTime = 0f;
+        protected Collider2D _collider;
         
         /// <summary>
         /// 交互提示文本
         /// </summary>
         public string InteractionPrompt => interactionPrompt;
-        
-        /// <summary>
-        /// 交互范围
-        /// </summary>
-        public float InteractionRange => interactionRange;
         
         /// <summary>
         /// 是否可以多次交互
@@ -36,10 +33,20 @@ namespace SpookyGame.World
         /// </summary>
         public bool HasInteracted => _hasInteracted;
         
+        protected virtual void Awake()
+        {
+            // 获取 Collider2D 组件
+            _collider = GetComponent<Collider2D>();
+            if (_collider == null)
+            {
+                Debug.LogError($"[Interactable] {gameObject.name} 缺少 Collider2D 组件！", gameObject);
+            }
+        }
+        
         /// <summary>
-        /// 检查是否可以与指定对象交互
+        /// 检查是否可以交互（点击式游戏不需要距离检测）
         /// </summary>
-        /// <param name="actor">交互者</param>
+        /// <param name="actor">交互者（通常是 Interactor）</param>
         /// <returns>是否可以交互</returns>
         public virtual bool CanInteract(GameObject actor)
         {
@@ -51,13 +58,6 @@ namespace SpookyGame.World
             
             // 检查是否已经交互过且不允许多次交互
             if (_hasInteracted && !canInteractMultipleTimes)
-            {
-                return false;
-            }
-            
-            // 检查距离
-            float distance = Vector2.Distance(transform.position, actor.transform.position);
-            if (distance > interactionRange)
             {
                 return false;
             }
@@ -110,21 +110,28 @@ namespace SpookyGame.World
         }
         
         /// <summary>
-        /// 设置交互范围
+        /// 启用/禁用交互
         /// </summary>
-        /// <param name="range">新的交互范围</param>
-        public virtual void SetInteractionRange(float range)
+        /// <param name="enabled">是否启用</param>
+        public virtual void SetInteractionEnabled(bool enabled)
         {
-            interactionRange = range;
+            if (_collider != null)
+            {
+                _collider.enabled = enabled;
+            }
         }
         
         /// <summary>
-        /// 在 Scene 视图中绘制交互范围
+        /// 在 Scene 视图中绘制 Collider 边界
         /// </summary>
         protected virtual void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, interactionRange);
+            Collider2D col = GetComponent<Collider2D>();
+            if (col != null)
+            {
+                Gizmos.color = new Color(0, 1, 0, 0.3f); // 半透明绿色
+                Gizmos.DrawCube(col.bounds.center, col.bounds.size);
+            }
         }
     }
 }
