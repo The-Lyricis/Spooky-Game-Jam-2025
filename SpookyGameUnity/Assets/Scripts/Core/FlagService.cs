@@ -53,6 +53,25 @@ namespace SpookyGame.Core
             
             // 发布旗标变化事件
             EventBus.Publish(new FlagChangedEvent(flagName, value, previousValue));
+            
+            // 如果是手持物变化，触发提示刷新
+            if (flagName.StartsWith("held_") || flagName == "held")
+            {
+                RefreshInteractionPrompts();
+            }
+        }
+        
+        /// <summary>
+        /// 触发交互提示刷新
+        /// </summary>
+        private static void RefreshInteractionPrompts()
+        {
+            // 查找 Interactor 并刷新提示
+            var interactor = UnityEngine.Object.FindObjectOfType<SpookyGame.Player.Interactor>();
+            if (interactor != null)
+            {
+                interactor.RefreshPrompt();
+            }
         }
         
         /// <summary>

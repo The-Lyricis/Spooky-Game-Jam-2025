@@ -19,7 +19,12 @@ namespace SpookyGame.World
         protected Collider2D _collider;
         
         /// <summary>
-        /// 交互提示文本
+        /// 当前交互提示文本（支持动态修改，例如根据手持物显示不同提示）
+        /// </summary>
+        public virtual string CurrentPrompt => interactionPrompt;
+        
+        /// <summary>
+        /// 交互提示文本（静态字段）
         /// </summary>
         public string InteractionPrompt => interactionPrompt;
         
@@ -33,6 +38,11 @@ namespace SpookyGame.World
         /// </summary>
         public bool HasInteracted => _hasInteracted;
         
+        /// <summary>
+        /// 是否启用交互（基于 Collider 状态）
+        /// </summary>
+        public bool InteractionEnabled => _collider != null && _collider.enabled;
+        
         protected virtual void Awake()
         {
             // 获取 Collider2D 组件
@@ -44,12 +54,29 @@ namespace SpookyGame.World
         }
         
         /// <summary>
-        /// 检查是否可以交互（点击式游戏不需要距离检测）
+        /// 检查是否可以悬停显示提示（不包含冷却和一次性判断）
+        /// </summary>
+        /// <param name="actor">交互者（通常是 Interactor）</param>
+        /// <returns>是否可以悬停</returns>
+        public virtual bool CanHover(GameObject actor)
+        {
+            // 默认只要启用就可以悬停显示提示
+            return InteractionEnabled;
+        }
+        
+        /// <summary>
+        /// 检查是否可以交互（点击时调用，包含冷却和一次性判断）
         /// </summary>
         /// <param name="actor">交互者（通常是 Interactor）</param>
         /// <returns>是否可以交互</returns>
         public virtual bool CanInteract(GameObject actor)
         {
+            // 先检查基础悬停条件
+            if (!CanHover(actor))
+            {
+                return false;
+            }
+            
             // 检查是否在冷却时间内
             if (Time.time - _lastInteractionTime < interactionCooldown)
             {
