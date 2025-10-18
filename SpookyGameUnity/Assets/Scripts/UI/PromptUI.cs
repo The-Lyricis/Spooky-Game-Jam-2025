@@ -12,7 +12,7 @@ namespace SpookyGame.UI
         [Header("UI References")]
         [SerializeField] private GameObject promptPanel;
         [SerializeField] private Text promptText;
-        [SerializeField] private Image promptIcon;
+        //[SerializeField] private Image promptIcon;
         
         [Header("Animation Settings")]
         [SerializeField] private float fadeInDuration = 0.2f;
@@ -22,23 +22,18 @@ namespace SpookyGame.UI
         [SerializeField] private bool autoHide = true;
         [SerializeField] private float displayDuration = 3f;
         
-        private CanvasGroup _canvasGroup;
+        //private CanvasGroup _canvasGroup;
         private bool _isVisible = false;
         private Coroutine _autoHideCoroutine;
         
         private void Awake()
         {
-            // 获取或添加 CanvasGroup 组件
-            _canvasGroup = GetComponent<CanvasGroup>();
-            if (_canvasGroup == null)
-            {
-                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
-            }
+            
             
             // 初始化状态
-            _canvasGroup.alpha = 0f;
-            _canvasGroup.interactable = false;
-            _canvasGroup.blocksRaycasts = false;
+            // _canvasGroup.alpha = 0f;
+            // _canvasGroup.interactable = false;
+            // _canvasGroup.blocksRaycasts = false;
             
             if (promptPanel != null)
             {
@@ -146,11 +141,11 @@ namespace SpookyGame.UI
             while (elapsedTime < fadeInDuration)
             {
                 elapsedTime += Time.deltaTime;
-                _canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeInDuration);
+                //_canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeInDuration);
                 yield return null;
             }
             
-            _canvasGroup.alpha = 1f;
+           // _canvasGroup.alpha = 1f;
         }
         
         /// <summary>
@@ -159,16 +154,16 @@ namespace SpookyGame.UI
         private System.Collections.IEnumerator FadeOut()
         {
             float elapsedTime = 0f;
-            float startAlpha = _canvasGroup.alpha;
+            //float startAlpha = _canvasGroup.alpha;
             
             while (elapsedTime < fadeOutDuration)
             {
                 elapsedTime += Time.deltaTime;
-                _canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsedTime / fadeOutDuration);
+                //_canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsedTime / fadeOutDuration);
                 yield return null;
             }
             
-            _canvasGroup.alpha = 0f;
+            //_canvasGroup.alpha = 0f;
             
             // 隐藏面板
             if (promptPanel != null)
@@ -195,11 +190,11 @@ namespace SpookyGame.UI
         /// <param name="sprite">新的图标精灵</param>
         public void SetPromptIcon(Sprite sprite)
         {
-            if (promptIcon != null)
-            {
-                promptIcon.sprite = sprite;
-                promptIcon.gameObject.SetActive(sprite != null);
-            }
+            // if (promptIcon != null)
+            // {
+            //     promptIcon.sprite = sprite;
+            //     promptIcon.gameObject.SetActive(sprite != null);
+            // }
         }
         
         /// <summary>
