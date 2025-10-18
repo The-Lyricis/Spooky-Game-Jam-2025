@@ -28,6 +28,9 @@ namespace SpookyGame.UI
         [SerializeField] private float fadeInDuration = 0.2f;
         [SerializeField] private float fadeOutDuration = 0.2f;
         
+        [Header("Click Outside Settings")]
+        [SerializeField] private float clickOutsideDelay = 0.3f; // 延迟检测点击外部关闭的时间
+        
         private CanvasGroup _canvasGroup;
         private bool _isVisible = false;
         private bool _isDragging = false;
@@ -35,6 +38,7 @@ namespace SpookyGame.UI
         private Vector3 _imageStartPos;
         private float _currentZoom = 1f;
         private Sprite _originalSprite;
+        private float _showTime = 0f; // 记录显示的时间
         
         private void Awake()
         {
@@ -93,6 +97,7 @@ namespace SpookyGame.UI
             // 显示面板
             closeupPanel.SetActive(true);
             _isVisible = true;
+            _showTime = Time.time; // 记录显示时间
             
             // 播放淡入动画
             StartCoroutine(FadeIn());
@@ -166,6 +171,12 @@ namespace SpookyGame.UI
         /// </summary>
         private void HandleClickOutside()
         {
+            // 检查是否已经过了延迟时间
+            if (Time.time - _showTime < clickOutsideDelay)
+            {
+                return; // 还在延迟时间内，不处理点击外部关闭
+            }
+            
             if (UnityEngine.Input.GetMouseButtonDown(0) && !_isDragging)
             {
                 // 如果点击的不是图片，则关闭
