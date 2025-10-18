@@ -97,7 +97,8 @@ namespace SpookyGame.Core
         /// </summary>
         /// <param name="sceneName">场景名称</param>
         /// <param name="onComplete">加载完成回调</param>
-        public static void LoadScene(string sceneName, Action onComplete = null)
+        /// <param name="transitionText">过渡文字（可选）</param>
+        public static void LoadScene(string sceneName, Action onComplete = null, string transitionText = null)
         {
             if (!_isInitialized)
             {
@@ -111,6 +112,30 @@ namespace SpookyGame.Core
                 return;
             }
             
+            // 如果有过渡文字，使用协程处理
+            if (!string.IsNullOrEmpty(transitionText))
+            {
+                if (_coroutineRunner == null)
+                {
+                    Debug.LogWarning("[SceneService] No coroutine runner, loading scene without transition text");
+                    LoadSceneInternal(sceneName, onComplete);
+                }
+                else
+                {
+                    _coroutineRunner.StartCoroutine(LoadSceneWithTransitionCoroutine(sceneName, transitionText, onComplete));
+                }
+            }
+            else
+            {
+                LoadSceneInternal(sceneName, onComplete);
+            }
+        }
+        
+        /// <summary>
+        /// 内部场景加载方法
+        /// </summary>
+        private static void LoadSceneInternal(string sceneName, Action onComplete = null)
+        {
             Debug.Log($"[SceneService] Loading scene: {sceneName}");
             
             // 发布场景开始加载事件
@@ -129,6 +154,28 @@ namespace SpookyGame.Core
                 // 执行完成回调
                 onComplete?.Invoke();
             };
+        }
+        
+        /// <summary>
+        /// 带过渡文字的场景加载协程
+        /// </summary>
+        private static IEnumerator LoadSceneWithTransitionCoroutine(string sceneName, string transitionText, Action onComplete)
+        {
+            Debug.Log($"[SceneService] Loading scene with transition text: {sceneName}");
+            
+            bool transitionComplete = false;
+            
+            // 显示过渡文字，等待玩家点击
+            EventBus.Publish(new TransitionTextEvent(transitionText, true, () =>
+            {
+                transitionComplete = true;
+            }));
+            
+            // 等待玩家点击完成
+            yield return new WaitUntil(() => transitionComplete);
+            
+            // 加载场景
+            LoadSceneInternal(sceneName, onComplete);
         }
         
         /// <summary>
@@ -219,7 +266,10 @@ namespace SpookyGame.Core
         /// 切换关卡（直接切换，无转场动画）
         /// </summary>
         /// <param name="stageId">关卡 ID</param>
-        public static void SwitchToStage(string stageId)
+        /// <param name="intertitle">转场标题文字（可选）</param>
+        /// <param name="fadeDuration">淡入淡出时长</param>
+        /// <param name="transitionText">过渡文字（可选，会在黑幕前显示并等待玩家点击）</param>
+        public static void FadeToStage(string stageId, string intertitle = "", float fadeDuration = 1f, string transitionText = null)
         {
             if (!_isInitialized)
             {
@@ -227,7 +277,51 @@ namespace SpookyGame.Core
                 return;
             }
             
-            // 直接激活关卡
+            if (_coroutineRunner == null)
+            {
+                Debug.LogWarning("[SceneService] No coroutine runner, falling back to direct activation");
+                ActivateStage(stageId);
+                return;
+            }
+            
+            _coroutineRunner.StartCoroutine(FadeToStageCoroutine(stageId, intertitle, fadeDuration, transitionText));
+        }
+        
+        /// <summary>
+        /// 黑幕转场协程
+        /// </summary>
+        private static IEnumerator FadeToStageCoroutine(string stageId, string intertitle, float fadeDuration, string transitionText = null)
+        {
+            // 如果有过渡文字，先显示
+            if (!string.IsNullOrEmpty(transitionText))
+            {
+                bool transitionComplete = false;
+                
+                // 显示过渡文字，等待玩家点击
+                EventBus.Publish(new TransitionTextEvent(transitionText, true, () =>
+                {
+                    transitionComplete = true;
+                }));
+                
+                // 等待玩家点击完成
+                yield return new WaitUntil(() => transitionComplete);
+            }
+            
+            // 发布转场开始事件
+            EventBus.Publish(new FadeStartedEvent(true, fadeDuration));
+            
+            // 等待淡入完成
+            yield return new WaitForSeconds(fadeDuration);
+            
+            // 显示标题文字
+            if (!string.IsNullOrEmpty(intertitle))
+            {
+                EventBus.Publish(new IntertitleEvent(intertitle, true));
+                yield return new WaitForSeconds(2f); // 显示 2 秒
+                EventBus.Publish(new IntertitleEvent(intertitle, false));
+            }
+            
+            // 切换关卡
             ActivateStage(stageId);
             
             Debug.Log($"[SceneService] Switched to stage: {stageId}");
@@ -331,4 +425,50 @@ namespace SpookyGame.Core
         }
     }
     
+    /// <summary>
+    /// 转场淡入淡出事件
+    /// </summary>
+    public class FadeStartedEvent : IEvent
+    {
+        public bool FadeIn { get; } // true = 淡入黑幕, false = 淡出黑幕
+        public float Duration { get; }
+        
+        public FadeStartedEvent(bool fadeIn, float duration)
+        {
+            FadeIn = fadeIn;
+            Duration = duration;
+        }
+    }
+    
+    /// <summary>
+    /// 转场标题事件
+    /// </summary>
+    public class IntertitleEvent : IEvent
+    {
+        public string Text { get; }
+        public bool Show { get; }
+        
+        public IntertitleEvent(string text, bool show)
+        {
+            Text = text;
+            Show = show;
+        }
+    }
+    
+    /// <summary>
+    /// 过渡文字事件
+    /// </summary>
+    public class TransitionTextEvent : IEvent
+    {
+        public string Text { get; }
+        public bool Show { get; }
+        public System.Action OnComplete { get; }
+        
+        public TransitionTextEvent(string text, bool show, System.Action onComplete = null)
+        {
+            Text = text;
+            Show = show;
+            OnComplete = onComplete;
+        }
+    }
 }
