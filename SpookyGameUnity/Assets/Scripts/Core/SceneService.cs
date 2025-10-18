@@ -185,6 +185,9 @@ namespace SpookyGame.Core
                 return;
             }
             
+            // 清空手持物品和鼠标指针（新关卡重新开始）
+            ClearStageState();
+            
             // 关闭所有关卡
             foreach (var stage in _stages.Values)
             {
@@ -264,6 +267,20 @@ namespace SpookyGame.Core
             yield return new WaitForSeconds(fadeDuration);
             
             Debug.Log($"[SceneService] Fade transition to {stageId} completed");
+        }
+        
+        /// <summary>
+        /// 清空关卡状态（切换关卡时调用）
+        /// </summary>
+        private static void ClearStageState()
+        {
+            // 清空手持物品
+            FlagService.ClearHeldItem();
+            
+            // 重置鼠标指针为系统默认
+            UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            
+            Debug.Log("[SceneService] Stage state cleared (held item and cursor reset)");
         }
         
         /// <summary>

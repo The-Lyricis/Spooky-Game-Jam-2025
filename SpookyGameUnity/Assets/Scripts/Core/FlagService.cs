@@ -1,73 +1,193 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SpookyGame.Core
 {
     /// <summary>
-    /// 旗标服务，负责全局旗标的读写管理
+    /// 全局旗标服务
+    /// 支持 bool 旗标和 string 变量
     /// </summary>
     public static class FlagService
     {
         private static bool _isInitialized = false;
         private static Dictionary<string, bool> _flags = new Dictionary<string, bool>();
+        private static Dictionary<string, string> _vars = new Dictionary<string, string>();
         
-        /// <summary>
-        /// 初始化旗标服务
-        /// </summary>
         public static void Initialize()
         {
-            if (_isInitialized)
-            {
-                Debug.LogWarning("[FlagService] Already initialized");
-                return;
-            }
+            if (_isInitialized) return;
             
             _flags.Clear();
+            _vars.Clear();
             _isInitialized = true;
+            
             Debug.Log("[FlagService] Initialized");
         }
         
+        #region Bool Flags
+        
         /// <summary>
-        /// 设置旗标值
+        /// 获取布尔旗标（默认 false）
         /// </summary>
-        /// <param name="flagName">旗标名称</param>
-        /// <param name="value">旗标值</param>
-        public static void SetFlag(string flagName, bool value)
+        public static bool GetFlag(string flagName)
         {
-            if (!_isInitialized)
-            {
-                Debug.LogError("[FlagService] Not initialized. Call Initialize() first.");
-                return;
-            }
-            
-            if (string.IsNullOrEmpty(flagName))
-            {
-                Debug.LogError("[FlagService] Flag name cannot be null or empty");
-                return;
-            }
-            
-            bool previousValue = _flags.ContainsKey(flagName) ? _flags[flagName] : false;
-            _flags[flagName] = value;
-            
-            Debug.Log($"[FlagService] Flag '{flagName}' set to {value}");
-            
-            // 发布旗标变化事件
-            EventBus.Publish(new FlagChangedEvent(flagName, value, previousValue));
-            
-            // 如果是手持物变化，触发提示刷新
-            if (flagName.StartsWith("held_") || flagName == "held")
-            {
-                RefreshInteractionPrompts();
-            }
+            if (string.IsNullOrEmpty(flagName)) return false;
+            return _flags.ContainsKey(flagName) ? _flags[flagName] : false;
         }
         
         /// <summary>
-        /// 触发交互提示刷新
+        /// 设置布尔旗标
+        /// </summary>
+        public static void SetFlag(string flagName, bool value)
+        {
+            if (string.IsNullOrEmpty(flagName)) return;
+            
+            bool previousValue = GetFlag(flagName);
+            _flags[flagName] = value;
+            
+            if (EventBus.IsInitialized)
+            {
+                EventBus.Publish(new FlagChangedEvent(flagName, value, previousValue));
+            }
+            
+            Debug.Log($"[FlagService] Flag '{flagName}' set to {value}");
+        }
+        
+        #endregion
+        
+        #region String Variables
+        
+        /// <summary>
+        /// 获取字符串变量（默认空字符串）
+        /// </summary>
+        public static string GetVar(string varName)
+        {
+            if (string.IsNullOrEmpty(varName)) return "";
+            return _vars.ContainsKey(varName) ? _vars[varName] : "";
+        }
+        
+        /// <summary>
+        /// 设置字符串变量
+        /// </summary>
+        public static void SetVar(string varName, string value)
+        {
+            if (string.IsNullOrEmpty(varName)) return;
+            
+            string previousValue = GetVar(varName);
+            _vars[varName] = value ?? "";
+            
+            if (EventBus.IsInitialized)
+            {
+                EventBus.Publish(new VarChangedEvent(varName, value, previousValue));
+            }
+            
+            // 特殊变量：held 变化时刷新交互提示
+            if (varName == "held")
+            {
+                RefreshInteractionPrompts();
+            }
+            
+            Debug.Log($"[FlagService] Var '{varName}' set to '{value}'");
+        }
+        
+        /// <summary>
+        /// 获取整数变量（如 day）
+        /// </summary>
+        public static int GetInt(string varName)
+        {
+            string value = GetVar(varName);
+            return int.TryParse(value, out int result) ? result : 0;
+        }
+        
+        /// <summary>
+        /// 设置整数变量
+        /// </summary>
+        public static void SetInt(string varName, int value)
+        {
+            SetVar(varName, value.ToString());
+        }
+        
+        #endregion
+        
+        #region Shortcuts
+        
+        /// <summary>
+        /// 获取当前手持物品
+        /// </summary>
+        public static string GetHeldItem()
+        {
+            return GetVar("held");
+        }
+        
+        /// <summary>
+        /// 设置当前手持物品
+        /// </summary>
+        public static void SetHeldItem(string itemId)
+        {
+            SetVar("held", itemId);
+        }
+        
+        /// <summary>
+        /// 清空手持物品
+        /// </summary>
+        public static void ClearHeldItem()
+        {
+            SetVar("held", "");
+        }
+        
+        /// <summary>
+        /// 获取抽屉物品
+        /// </summary>
+        public static string GetSlot(int slotIndex)
+        {
+            return GetVar($"slot.{slotIndex}");
+        }
+        
+        /// <summary>
+        /// 设置抽屉物品
+        /// </summary>
+        public static void SetSlot(int slotIndex, string itemId)
+        {
+            SetVar($"slot.{slotIndex}", itemId);
+        }
+        
+        /// <summary>
+        /// 获取当前天数
+        /// </summary>
+        public static int GetDay()
+        {
+            return GetInt("day");
+        }
+        
+        /// <summary>
+        /// 设置当前天数
+        /// </summary>
+        public static void SetDay(int day)
+        {
+            SetInt("day", day);
+        }
+        
+        #endregion
+        
+        #region Utility
+        
+        /// <summary>
+        /// 清空所有旗标和变量
+        /// </summary>
+        public static void ClearAllFlags()
+        {
+            _flags.Clear();
+            _vars.Clear();
+            Debug.Log("[FlagService] All flags and vars cleared");
+        }
+        
+        /// <summary>
+        /// 刷新交互提示（当 held 变化时）
         /// </summary>
         private static void RefreshInteractionPrompts()
         {
-            // 查找 Interactor 并刷新提示
-            var interactor = UnityEngine.Object.FindObjectOfType<SpookyGame.Player.Interactor>();
+            var interactor = UnityEngine.Object.FindObjectOfType<SpookyGame.World.Interactor>();
             if (interactor != null)
             {
                 interactor.RefreshPrompt();
@@ -75,111 +195,24 @@ namespace SpookyGame.Core
         }
         
         /// <summary>
-        /// 获取旗标值
+        /// 调试：打印所有旗标和变量
         /// </summary>
-        /// <param name="flagName">旗标名称</param>
-        /// <returns>旗标值，如果不存在则返回 false</returns>
-        public static bool GetFlag(string flagName)
+        public static void DebugPrintAll()
         {
-            if (!_isInitialized)
+            Debug.Log("=== Flags ===");
+            foreach (var kvp in _flags)
             {
-                Debug.LogError("[FlagService] Not initialized. Call Initialize() first.");
-                return false;
+                Debug.Log($"  {kvp.Key} = {kvp.Value}");
             }
             
-            if (string.IsNullOrEmpty(flagName))
+            Debug.Log("=== Vars ===");
+            foreach (var kvp in _vars)
             {
-                Debug.LogError("[FlagService] Flag name cannot be null or empty");
-                return false;
-            }
-            
-            return _flags.ContainsKey(flagName) ? _flags[flagName] : false;
-        }
-        
-        /// <summary>
-        /// 检查旗标是否存在
-        /// </summary>
-        /// <param name="flagName">旗标名称</param>
-        /// <returns>是否存在</returns>
-        public static bool HasFlag(string flagName)
-        {
-            if (!_isInitialized) return false;
-            return _flags.ContainsKey(flagName);
-        }
-        
-        /// <summary>
-        /// 删除旗标
-        /// </summary>
-        /// <param name="flagName">旗标名称</param>
-        public static void RemoveFlag(string flagName)
-        {
-            if (!_isInitialized)
-            {
-                Debug.LogError("[FlagService] Not initialized. Call Initialize() first.");
-                return;
-            }
-            
-            if (_flags.ContainsKey(flagName))
-            {
-                bool previousValue = _flags[flagName];
-                _flags.Remove(flagName);
-                
-                Debug.Log($"[FlagService] Flag '{flagName}' removed");
-                
-                // 发布旗标删除事件
-                EventBus.Publish(new FlagRemovedEvent(flagName, previousValue));
+                Debug.Log($"  {kvp.Key} = '{kvp.Value}'");
             }
         }
         
-        /// <summary>
-        /// 获取所有旗标
-        /// </summary>
-        /// <returns>旗标字典的副本</returns>
-        public static Dictionary<string, bool> GetAllFlags()
-        {
-            if (!_isInitialized)
-            {
-                Debug.LogError("[FlagService] Not initialized. Call Initialize() first.");
-                return new Dictionary<string, bool>();
-            }
-            
-            return new Dictionary<string, bool>(_flags);
-        }
-        
-        /// <summary>
-        /// 设置多个旗标
-        /// </summary>
-        /// <param name="flags">旗标字典</param>
-        public static void SetFlags(Dictionary<string, bool> flags)
-        {
-            if (!_isInitialized)
-            {
-                Debug.LogError("[FlagService] Not initialized. Call Initialize() first.");
-                return;
-            }
-            
-            if (flags == null) return;
-            
-            foreach (var kvp in flags)
-            {
-                SetFlag(kvp.Key, kvp.Value);
-            }
-        }
-        
-        /// <summary>
-        /// 清空所有旗标
-        /// </summary>
-        public static void ClearAllFlags()
-        {
-            if (!_isInitialized)
-            {
-                Debug.LogError("[FlagService] Not initialized. Call Initialize() first.");
-                return;
-            }
-            
-            _flags.Clear();
-            Debug.Log("[FlagService] All flags cleared");
-        }
+        #endregion
     }
     
     /// <summary>
@@ -189,28 +222,30 @@ namespace SpookyGame.Core
     {
         public string FlagName { get; }
         public bool NewValue { get; }
-        public bool PreviousValue { get; }
+        public bool OldValue { get; }
         
-        public FlagChangedEvent(string flagName, bool newValue, bool previousValue)
+        public FlagChangedEvent(string flagName, bool newValue, bool oldValue)
         {
             FlagName = flagName;
             NewValue = newValue;
-            PreviousValue = previousValue;
+            OldValue = oldValue;
         }
     }
     
     /// <summary>
-    /// 旗标删除事件
+    /// 变量变化事件
     /// </summary>
-    public class FlagRemovedEvent : IEvent
+    public class VarChangedEvent : IEvent
     {
-        public string FlagName { get; }
-        public bool PreviousValue { get; }
+        public string VarName { get; }
+        public string NewValue { get; }
+        public string OldValue { get; }
         
-        public FlagRemovedEvent(string flagName, bool previousValue)
+        public VarChangedEvent(string varName, string newValue, string oldValue)
         {
-            FlagName = flagName;
-            PreviousValue = previousValue;
+            VarName = varName;
+            NewValue = newValue;
+            OldValue = oldValue;
         }
     }
 }

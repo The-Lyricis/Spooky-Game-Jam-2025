@@ -88,7 +88,7 @@ namespace SpookyGame.UI
             StageConfig firstStage = gameConfig.GetStageConfig(gameConfig.firstStageId);
             
             // 加载游戏场景
-            SceneService.LoadScene(gameConfig.GameSceneName, () =>
+            SceneService.LoadScene(gameConfig.gameSceneName, () =>
             {
                 // 场景加载完成后，使用转场效果启动第一关
                 SceneService.FadeToStage(
@@ -120,7 +120,7 @@ namespace SpookyGame.UI
             // string savedStage = saveData.currentStageId;
             
             // 加载游戏场景
-            SceneService.LoadScene(gameConfig.GameSceneName, () =>
+            SceneService.LoadScene(gameConfig.gameSceneName, () =>
             {
                 // 加载到存档的关卡
                 // SceneService.ActivateStage(savedStage);

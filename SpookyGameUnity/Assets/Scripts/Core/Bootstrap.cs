@@ -25,11 +25,13 @@ namespace SpookyGame.Core
             }
             
             DontDestroyOnLoad(gameObject);
+            
+            // 在 Awake 中初始化服务，确保在所有 Start() 之前完成
+            InitializeServices();
         }
         
         private void Start()
         {
-            InitializeServices();
             LoadFirstScene();
         }
         
@@ -91,10 +93,10 @@ namespace SpookyGame.Core
                 
                 EventBus.Publish(new GameStateChangedEvent(GameState.Exploring));
             }
-            else if (gameConfig.useMainMenu && currentSceneName != gameConfig.MainMenuSceneName)
+            else if (gameConfig.useMainMenu && currentSceneName != gameConfig.mainMenuSceneName)
             {
                 // ========== 情况 2: 不在主菜单，且启用了主菜单 ==========
-                LogDebug($"Loading main menu: {gameConfig.MainMenuSceneName}");
+                LogDebug($"Loading main menu: {gameConfig.mainMenuSceneName}");
                 
                 // 先淡入黑幕
                 EventBus.Publish(new FadeStartedEvent(true, 0.5f));
@@ -119,7 +121,7 @@ namespace SpookyGame.Core
         {
             yield return new WaitForSeconds(delay);
             
-            SceneService.LoadScene(gameConfig.MainMenuSceneName, () =>
+            SceneService.LoadScene(gameConfig.mainMenuSceneName, () =>
             {
                 // 主菜单加载完成，淡出黑幕
                 EventBus.Publish(new FadeStartedEvent(false, gameConfig.defaultFadeDuration));

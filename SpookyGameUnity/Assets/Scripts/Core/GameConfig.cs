@@ -1,7 +1,4 @@
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace SpookyGame.Core
 {
@@ -12,57 +9,12 @@ namespace SpookyGame.Core
     [CreateAssetMenu(fileName = "GameConfig", menuName = "SpookyGame/Game Config")]
     public class GameConfig : ScriptableObject
     {
-        [Header("Scene References")]
-        [Tooltip("主菜单场景文件")]
-        #if UNITY_EDITOR
-        [SerializeField] private SceneAsset mainMenuSceneAsset;
-        #endif
+        [Header("Scene Names")]
+        [Tooltip("主菜单场景名称")]
+        public string mainMenuSceneName = "MainMenu";
         
-        [Tooltip("游戏场景文件")]
-        #if UNITY_EDITOR
-        [SerializeField] private SceneAsset gameSceneAsset;
-        #endif
-        
-        [Header("Scene Names (Auto-generated)")]
-        [Tooltip("主菜单场景名称（自动从 SceneAsset 获取）")]
-        [SerializeField] private string mainMenuSceneName = "MainMenu";
-        
-        [Tooltip("游戏场景名称（自动从 SceneAsset 获取）")]
-        [SerializeField] private string gameSceneName = "GameScene";
-        
-        /// <summary>
-        /// 获取主菜单场景名称
-        /// </summary>
-        public string MainMenuSceneName
-        {
-            get
-            {
-                #if UNITY_EDITOR
-                if (mainMenuSceneAsset != null)
-                {
-                    return mainMenuSceneAsset.name;
-                }
-                #endif
-                return mainMenuSceneName;
-            }
-        }
-        
-        /// <summary>
-        /// 获取游戏场景名称
-        /// </summary>
-        public string GameSceneName
-        {
-            get
-            {
-                #if UNITY_EDITOR
-                if (gameSceneAsset != null)
-                {
-                    return gameSceneAsset.name;
-                }
-                #endif
-                return gameSceneName;
-            }
-        }
+        [Tooltip("游戏场景名称")]
+        public string gameSceneName = "GameScene";
         
         [Header("Stage Configuration")]
         [Tooltip("首个关卡ID")]
