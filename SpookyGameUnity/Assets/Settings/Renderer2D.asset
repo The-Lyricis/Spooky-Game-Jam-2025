@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d19e663d3bbccd499e51125d51f7629, type: 3}
   m_Name: WhosLilaRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   settings:
     effectMaterial: {fileID: 2100000, guid: 214e73f340061984da6443ba43fa64af, type: 2}
     renderPassEvent: 550
@@ -21,13 +21,13 @@ MonoBehaviour:
     contrast: 0.5
     brightness: -0.5
     saturation: 1.17
-    ditherStrength: 0.5
-    ditherScale: 1.37
-    scanlineIntensity: 0
-    scanlineCount: 442
-    noiseAmount: 0.022
+    ditherStrength: 1
+    ditherScale: 3.59
+    scanlineIntensity: 0.157
+    scanlineCount: 548
+    noiseAmount: 0.035
     vignette: 1
-    grainSize: 3.94
+    grainSize: 4
     grainAmount: 0
 --- !u!114 &11400000
 MonoBehaviour:
@@ -50,7 +50,7 @@ MonoBehaviour:
   m_UseNativeRenderPass: 0
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 23
   m_TransparencySortMode: 0
   m_TransparencySortAxis: {x: 0, y: 1, z: 0}
   m_HDREmulationScale: 1

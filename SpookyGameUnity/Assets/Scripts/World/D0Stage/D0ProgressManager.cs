@@ -154,7 +154,7 @@ namespace SpookyGame.D0Scene
             // 使用对话系统，传入完成回调
             dialogueSystem.StartDialogue(dialogueLines, OnDialogueComplete);
         }
-        
+        [SerializeField] private string StagechangeStr = "第一关完成，即将进入第二关";
         /// <summary>
         /// 对话完成时的回调
         /// </summary>
@@ -163,7 +163,7 @@ namespace SpookyGame.D0Scene
             Debug.Log("[D0ProgressManager] Dialogue complete. Switching to next stage...");
             
             // 切换到下一关
-            SceneService.FadeToStage(nextStageId,"",1f,"123");
+            SceneService.FadeToStage(nextStageId,"",1f,StagechangeStr);
         }
     }
 }

@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: WhosLilaMaterial
-  m_Shader: {fileID: 4800000, guid: bee4cbf1b1c2fbc4aa5821d8865cd270, type: 3}
+  m_Shader: {fileID: 4800000, guid: 45a2a7999670dc3408b5477de30a89f9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -76,24 +76,24 @@ Material:
     - _Contrast: 0.5
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _DitherScale: 1.37
-    - _DitherStrength: 0.5
+    - _DitherScale: 3.59
+    - _DitherStrength: 1
     - _DstBlend: 0
     - _EnableExternalAlpha: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _GrainAmount: 0
-    - _GrainSize: 3.94
+    - _GrainSize: 4
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseAmount: 0.022
+    - _NoiseAmount: 0.035
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _PixelSize: 1000
     - _Saturation: 1.17
-    - _ScanlineCount: 442
-    - _ScanlineIntensity: 0
+    - _ScanlineCount: 548
+    - _ScanlineIntensity: 0.157
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
