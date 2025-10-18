@@ -1,7 +1,6 @@
 using UnityEngine;
 using SpookyGame.Core;
 using UnityEngine.UI;
-using TMPro;
 
 namespace SpookyGame.D0Scene
 {
@@ -26,7 +25,7 @@ namespace SpookyGame.D0Scene
         [SerializeField] private GameObject dialoguePanel;
         
         [Tooltip("对话文本")]
-        [SerializeField] private TextMeshProUGUI dialogueText;
+        [SerializeField] private Text dialogueText;
         
         [Tooltip("对话内容")]
         [TextArea(2, 5)]
@@ -108,17 +107,35 @@ namespace SpookyGame.D0Scene
         
         /// <summary>
         /// 更新物体显示
+        /// 确保先隐藏旧物体，再启用新物体
         /// </summary>
         private void UpdateObjects()
         {
             int count = _lastInspectionCount;
             
-            // 根据检视数量显示不同物体
-            if (objectA != null) objectA.SetActive(count == 0);
-            if (objectB != null) objectB.SetActive(count == 1);
-            if (objectC != null) objectC.SetActive(count == 2);
+            // 先隐藏所有物体
+            if (objectA != null) objectA.SetActive(false);
+            if (objectB != null) objectB.SetActive(false);
+            if (objectC != null) objectC.SetActive(false);
             
-            Debug.Log($"[D0ProgressManager] Objects updated. Count: {count}");
+            // 再根据检视数量显示对应物体
+            switch (count)
+            {
+                case 0:
+                    if (objectA != null) objectA.SetActive(true);
+                    Debug.Log($"[D0ProgressManager] Showing ObjectA");
+                    break;
+                
+                case 1:
+                    if (objectB != null) objectB.SetActive(true);
+                    Debug.Log($"[D0ProgressManager] A hidden → B enabled");
+                    break;
+                
+                case 2:
+                    if (objectC != null) objectC.SetActive(true);
+                    Debug.Log($"[D0ProgressManager] B hidden → C enabled");
+                    break;
+            }
         }
         
         /// <summary>
