@@ -165,17 +165,45 @@ namespace SpookyGame.Core
             
             bool transitionComplete = false;
             
-            // 显示过渡文字，等待玩家点击
+            // 显示过渡文字
             EventBus.Publish(new TransitionTextEvent(transitionText, true, () =>
             {
                 transitionComplete = true;
             }));
             
+            // 等待过渡文字淡入完成后开始加载场景
+            yield return new WaitForSeconds(0.5f); // 等待过渡UI淡入
+            
+            // 在后台加载场景
+            Debug.Log($"[SceneService] Starting scene load: {sceneName}");
+            AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName);
+            loadOperation.allowSceneActivation = false; // 先不激活场景
+            
+            // 等待场景加载完成（但不激活）
+            while (loadOperation.progress < 0.9f)
+            {
+                yield return null;
+            }
+            
+            Debug.Log($"[SceneService] Scene loaded (waiting for player click): {sceneName}");
+            
             // 等待玩家点击完成
             yield return new WaitUntil(() => transitionComplete);
             
-            // 加载场景
-            LoadSceneInternal(sceneName, onComplete);
+            // 激活场景
+            loadOperation.allowSceneActivation = true;
+            
+            // 等待场景真正激活
+            yield return new WaitUntil(() => loadOperation.isDone);
+            
+            _currentSceneName = sceneName;
+            Debug.Log($"[SceneService] Scene activated: {sceneName}");
+            
+            // 发布场景加载完成事件
+            EventBus.Publish(new SceneLoadCompletedEvent(sceneName));
+            
+            // 执行完成回调
+            onComplete?.Invoke();
         }
         
         /// <summary>
@@ -263,12 +291,12 @@ namespace SpookyGame.Core
         }
         
         /// <summary>
-        /// 切换关卡（直接切换，无转场动画）
+        /// 使用过渡文字或黑幕转场切换关卡
         /// </summary>
         /// <param name="stageId">关卡 ID</param>
-        /// <param name="intertitle">转场标题文字（可选）</param>
+        /// <param name="intertitle">转场标题文字（可选，仅在无过渡文字时使用）</param>
         /// <param name="fadeDuration">淡入淡出时长</param>
-        /// <param name="transitionText">过渡文字（可选，会在黑幕前显示并等待玩家点击）</param>
+        /// <param name="transitionText">过渡文字（可选，如果提供则使用过渡文字而非黑幕）</param>
         public static void FadeToStage(string stageId, string intertitle = "", float fadeDuration = 1f, string transitionText = null)
         {
             if (!_isInitialized)
@@ -292,39 +320,57 @@ namespace SpookyGame.Core
         /// </summary>
         private static IEnumerator FadeToStageCoroutine(string stageId, string intertitle, float fadeDuration, string transitionText = null)
         {
-            // 如果有过渡文字，先显示
+            Debug.Log($"[SceneService] Fading to stage: {stageId}, transitionText: {transitionText}");
+            
+            // 如果有过渡文字，使用过渡文字方式
             if (!string.IsNullOrEmpty(transitionText))
             {
                 bool transitionComplete = false;
                 
-                // 显示过渡文字，等待玩家点击
+                // 显示过渡文字
                 EventBus.Publish(new TransitionTextEvent(transitionText, true, () =>
                 {
                     transitionComplete = true;
                 }));
                 
+                // 等待过渡文字淡入完成后立即切换场景
+                yield return new WaitForSeconds(0.5f); // 等待过渡UI淡入
+                
+                // 在过渡文字显示时切换关卡
+                ActivateStage(stageId);
+                Debug.Log($"[SceneService] Stage switched to {stageId} while showing transition text");
+                
                 // 等待玩家点击完成
                 yield return new WaitUntil(() => transitionComplete);
+                Debug.Log($"[SceneService] Transition to {stageId} completed");
             }
-            
-            // 发布转场开始事件
-            EventBus.Publish(new FadeStartedEvent(true, fadeDuration));
-            
-            // 等待淡入完成
-            yield return new WaitForSeconds(fadeDuration);
-            
-            // 显示标题文字
-            if (!string.IsNullOrEmpty(intertitle))
+            else
             {
-                EventBus.Publish(new IntertitleEvent(intertitle, true));
-                yield return new WaitForSeconds(2f); // 显示 2 秒
-                EventBus.Publish(new IntertitleEvent(intertitle, false));
+                // 没有过渡文字，使用传统黑幕转场
+                // 发布转场开始事件
+                EventBus.Publish(new FadeStartedEvent(true, fadeDuration));
+                
+                // 等待淡入完成
+                yield return new WaitForSeconds(fadeDuration);
+                
+                // 显示标题文字
+                if (!string.IsNullOrEmpty(intertitle))
+                {
+                    EventBus.Publish(new IntertitleEvent(intertitle, true));
+                    yield return new WaitForSeconds(2f); // 显示 2 秒
+                    EventBus.Publish(new IntertitleEvent(intertitle, false));
+                }
+                
+                // 切换关卡
+                ActivateStage(stageId);
+                
+                // 淡出黑幕
+                EventBus.Publish(new FadeStartedEvent(false, fadeDuration));
+                
+                yield return new WaitForSeconds(fadeDuration);
+                
+                Debug.Log($"[SceneService] Fade transition to {stageId} completed");
             }
-            
-            // 切换关卡
-            ActivateStage(stageId);
-            
-            Debug.Log($"[SceneService] Switched to stage: {stageId}");
         }
         
         /// <summary>

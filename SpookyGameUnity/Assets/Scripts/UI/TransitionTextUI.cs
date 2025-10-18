@@ -91,6 +91,7 @@ namespace SpookyGame.UI
         /// </summary>
         public void Handle(TransitionTextEvent eventData)
         {
+            Debug.Log("123123222");
             if (eventData.Show)
             {
                 ShowTransitionText(eventData.Text, eventData.OnComplete);

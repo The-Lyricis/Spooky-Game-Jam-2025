@@ -1,5 +1,6 @@
 using UnityEngine;
 using SpookyGame.Core;
+using System.ComponentModel.Design;
 
 namespace SpookyGame.World
 {
@@ -80,7 +81,11 @@ namespace SpookyGame.World
             
             // 切换场景
             Debug.Log($"[Beard] 切换到场景: {targetStageId}");
-            SceneService.SwitchToStage(targetStageId);
+            SceneService.FadeToStage(targetStageId,"",1f,"123");
+            // SceneService.FadeToStage(stageId: targetStageId,
+            // intertitle: "第二关",
+            // fadeDuration: 1f,
+            // transitionText: "你推开了沉重的大门...\n\n里面是一片漆黑。");
         }
     }
 }
