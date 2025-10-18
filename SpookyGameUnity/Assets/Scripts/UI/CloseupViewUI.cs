@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 namespace SpookyGame.UI
 {
     /// <summary>
     /// 物品特写查看 UI 控制器
-    /// 支持缩放、拖动、点击外部关闭等功能
+    /// 支持单层/多层显示、缩放、拖动、点击外部关闭等功能
     /// </summary>
     public class CloseupViewUI : MonoBehaviour
     {
@@ -14,6 +15,10 @@ namespace SpookyGame.UI
         [SerializeField] private GameObject closeupPanel;
         [SerializeField] private Image closeupImage;
         [SerializeField] private RectTransform imageTransform;
+        
+        [Header("Multi-Layer Support")]
+        [Tooltip("图层容器（用于多层显示）")]
+        [SerializeField] private Transform layerContainer;
         
         [Header("Zoom Settings")]
         [SerializeField] private float minZoom = 0.5f;
@@ -35,6 +40,10 @@ namespace SpookyGame.UI
         private Vector3 _imageStartPos;
         private float _currentZoom = 1f;
         private Sprite _originalSprite;
+        
+        // 多层支持
+        private List<GameObject> _activeLayers = new List<GameObject>();
+        private bool _isMultiLayer = false;
         
         private void Awake()
         {
@@ -108,6 +117,19 @@ namespace SpookyGame.UI
             if (!_isVisible) return;
             
             _isVisible = false;
+            
+            // 清理多层图层
+            if (_isMultiLayer)
+            {
+                ClearLayers();
+                _isMultiLayer = false;
+                
+                // 重新显示单层 Image
+                if (closeupImage != null)
+                {
+                    closeupImage.gameObject.SetActive(true);
+                }
+            }
             
             // 播放淡出动画
             StartCoroutine(FadeOut());
@@ -256,6 +278,110 @@ namespace SpookyGame.UI
             maxZoom = max;
             _currentZoom = Mathf.Clamp(_currentZoom, minZoom, maxZoom);
         }
+        
+        #region 多层显示支持
+        
+        /// <summary>
+        /// 显示多层特写
+        /// </summary>
+        /// <param name="layers">图层数组（从后到前：背景 → 前景）</param>
+        public void ShowMultiLayerCloseup(Sprite[] layers)
+        {
+            if (layers == null || layers.Length == 0)
+            {
+                Debug.LogWarning("[CloseupViewUI] No layers provided!");
+                return;
+            }
+            
+            // 如果只有一层，使用单层模式
+            if (layers.Length == 1)
+            {
+                ShowCloseup(layers[0]);
+                return;
+            }
+            
+            // 多层模式
+            _isMultiLayer = true;
+            
+            // 隐藏原有单层 Image
+            if (closeupImage != null)
+            {
+                closeupImage.gameObject.SetActive(false);
+            }
+            
+            // 清空旧图层
+            ClearLayers();
+            
+            // 创建新图层
+            for (int i = 0; i < layers.Length; i++)
+            {
+                if (layers[i] != null)
+                {
+                    CreateLayer(layers[i], i);
+                }
+            }
+            
+            // 显示面板
+            closeupPanel.SetActive(true);
+            _isVisible = true;
+            
+            StartCoroutine(FadeIn());
+            
+            Debug.Log($"[CloseupViewUI] Showing {layers.Length} layers");
+        }
+        
+        /// <summary>
+        /// 创建图层
+        /// </summary>
+        private void CreateLayer(Sprite sprite, int index)
+        {
+            // 确定父容器
+            Transform parent = layerContainer != null ? layerContainer : closeupPanel.transform;
+            
+            // 创建图层 GameObject
+            GameObject layer = new GameObject($"Layer_{index}");
+            layer.transform.SetParent(parent);
+            
+            // 添加 RectTransform
+            RectTransform rectTransform = layer.AddComponent<RectTransform>();
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.one;
+            rectTransform.sizeDelta = Vector2.zero;
+            rectTransform.anchoredPosition = Vector2.zero;
+            rectTransform.localScale = Vector3.one;
+            
+            // 添加 CanvasRenderer 和 Image
+            layer.AddComponent<CanvasRenderer>();
+            Image image = layer.AddComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false; // 不阻挡射线
+            
+            // 设置层级顺序
+            layer.transform.SetSiblingIndex(index);
+            
+            _activeLayers.Add(layer);
+            
+            Debug.Log($"[CloseupViewUI] Created layer {index}: {sprite.name}");
+        }
+        
+        /// <summary>
+        /// 清空所有图层
+        /// </summary>
+        private void ClearLayers()
+        {
+            foreach (var layer in _activeLayers)
+            {
+                if (layer != null)
+                {
+                    Destroy(layer);
+                }
+            }
+            
+            _activeLayers.Clear();
+        }
+        
+        #endregion
         
         #region 编辑器辅助
         
