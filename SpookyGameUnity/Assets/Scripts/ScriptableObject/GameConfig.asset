@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainMenuSceneName: MainMenu
   gameSceneName: Scene_0
-  firstStageId: D0
+  firstStageId: D2
   stages:
   - stageId: D0
     displayName: DAY 0
