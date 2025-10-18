@@ -22,6 +22,8 @@ namespace SpookyGame.UI
         [SerializeField] private Sprite BirdIcon;
         [SerializeField] private Sprite BirdSkullIcon;
         [SerializeField] private Sprite TeethIcon;
+        [SerializeField] private Sprite HairsIcon;
+        [SerializeField] private Sprite ScissorIcon;
         
         // 未来可以添加更多工具图标
         // [SerializeField] private Sprite scissorsIcon;
@@ -125,6 +127,10 @@ namespace SpookyGame.UI
                     return BirdIcon;
                 case "Teeth":
                     return TeethIcon;
+                case "Hairs":
+                    return HairsIcon;
+                case "Scissor":
+                    return ScissorIcon;
                 // 未来添加更多工具
                 // case "scissors":
                 //     return scissorsIcon;
