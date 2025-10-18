@@ -1,16 +1,21 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace SpookyGame.Core
 {
     /// <summary>
-    /// 场景服务，负责关卡加载与过渡
+    /// 场景服务，负责场景加载与单场景多关卡切换
     /// </summary>
     public static class SceneService
     {
         private static bool _isInitialized = false;
         private static string _currentSceneName;
+        private static string _currentStageId;
+        private static Dictionary<string, StageEntry> _stages = new Dictionary<string, StageEntry>();
+        private static MonoBehaviour _coroutineRunner;
         
         /// <summary>
         /// 当前场景名称
@@ -18,9 +23,15 @@ namespace SpookyGame.Core
         public static string CurrentSceneName => _currentSceneName;
         
         /// <summary>
+        /// 当前关卡 ID
+        /// </summary>
+        public static string CurrentStageId => _currentStageId;
+        
+        /// <summary>
         /// 初始化场景服务
         /// </summary>
-        public static void Initialize()
+        /// <param name="coroutineRunner">用于运行协程的 MonoBehaviour（通常是 Bootstrap）</param>
+        public static void Initialize(MonoBehaviour coroutineRunner = null)
         {
             if (_isInitialized)
             {
@@ -29,8 +40,56 @@ namespace SpookyGame.Core
             }
             
             _currentSceneName = SceneManager.GetActiveScene().name;
+            _coroutineRunner = coroutineRunner;
+            
+            // 自动发现场景中的所有 Stage
+            DiscoverStages();
+            
             _isInitialized = true;
-            Debug.Log($"[SceneService] Initialized with current scene: {_currentSceneName}");
+            Debug.Log($"[SceneService] Initialized with current scene: {_currentSceneName}, found {_stages.Count} stages");
+        }
+        
+        /// <summary>
+        /// 自动发现场景中的所有 Stage 根节点
+        /// </summary>
+        private static void DiscoverStages()
+        {
+            _stages.Clear();
+            
+            // 查找所有以 "Stage_" 开头的根节点
+            GameObject[] rootObjects = SceneManager.GetActiveScene().GetRootGameObjects();
+            
+            foreach (GameObject obj in rootObjects)
+            {
+                if (obj.name.StartsWith("Stage_"))
+                {
+                    string stageId = obj.name.Replace("Stage_", "");
+                    RegisterStage(stageId, obj);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 注册关卡
+        /// </summary>
+        /// <param name="stageId">关卡 ID（如 D1, D2）</param>
+        /// <param name="stageRoot">关卡根节点</param>
+        /// <param name="initialFlags">进入时设置的旗标</param>
+        public static void RegisterStage(string stageId, GameObject stageRoot, Dictionary<string, bool> initialFlags = null)
+        {
+            if (_stages.ContainsKey(stageId))
+            {
+                Debug.LogWarning($"[SceneService] Stage {stageId} already registered, overwriting");
+            }
+            
+            _stages[stageId] = new StageEntry
+            {
+                stageId = stageId,
+                stageRoot = stageRoot,
+                initialFlags = initialFlags ?? new Dictionary<string, bool>()
+            };
+            
+            Debug.Log($"[SceneService] Registered stage: {stageId}");
         }
         
         /// <summary>
@@ -107,6 +166,149 @@ namespace SpookyGame.Core
             
             return false;
         }
+        
+        /// <summary>
+        /// 激活指定关卡（无转场动画，直接切换）
+        /// </summary>
+        /// <param name="stageId">关卡 ID</param>
+        public static void ActivateStage(string stageId)
+        {
+            if (!_isInitialized)
+            {
+                Debug.LogError("[SceneService] Not initialized. Call Initialize() first.");
+                return;
+            }
+            
+            if (!_stages.ContainsKey(stageId))
+            {
+                Debug.LogError($"[SceneService] Stage {stageId} not found!");
+                return;
+            }
+            
+            // 关闭所有关卡
+            foreach (var stage in _stages.Values)
+            {
+                if (stage.stageRoot != null)
+                {
+                    stage.stageRoot.SetActive(false);
+                }
+            }
+            
+            // 激活目标关卡
+            StageEntry targetStage = _stages[stageId];
+            if (targetStage.stageRoot != null)
+            {
+                targetStage.stageRoot.SetActive(true);
+            }
+            
+            // 设置初始旗标
+            ApplyStageFlags(targetStage);
+            
+            _currentStageId = stageId;
+            
+            Debug.Log($"[SceneService] Activated stage: {stageId}");
+            
+            // 发布关卡切换事件
+            EventBus.Publish(new StageChangedEvent(stageId));
+        }
+        
+        /// <summary>
+        /// 使用黑幕转场切换关卡
+        /// </summary>
+        /// <param name="stageId">关卡 ID</param>
+        /// <param name="intertitle">转场标题文字（可选）</param>
+        /// <param name="fadeDuration">淡入淡出时长</param>
+        public static void FadeToStage(string stageId, string intertitle = "", float fadeDuration = 1f)
+        {
+            if (!_isInitialized)
+            {
+                Debug.LogError("[SceneService] Not initialized. Call Initialize() first.");
+                return;
+            }
+            
+            if (_coroutineRunner == null)
+            {
+                Debug.LogWarning("[SceneService] No coroutine runner, falling back to direct activation");
+                ActivateStage(stageId);
+                return;
+            }
+            
+            _coroutineRunner.StartCoroutine(FadeToStageCoroutine(stageId, intertitle, fadeDuration));
+        }
+        
+        /// <summary>
+        /// 黑幕转场协程
+        /// </summary>
+        private static IEnumerator FadeToStageCoroutine(string stageId, string intertitle, float fadeDuration)
+        {
+            // 发布转场开始事件
+            EventBus.Publish(new FadeStartedEvent(true, fadeDuration));
+            
+            // 等待淡入完成
+            yield return new WaitForSeconds(fadeDuration);
+            
+            // 显示标题文字
+            if (!string.IsNullOrEmpty(intertitle))
+            {
+                EventBus.Publish(new IntertitleEvent(intertitle, true));
+                yield return new WaitForSeconds(2f); // 显示 2 秒
+                EventBus.Publish(new IntertitleEvent(intertitle, false));
+            }
+            
+            // 切换关卡
+            ActivateStage(stageId);
+            
+            // 淡出黑幕
+            EventBus.Publish(new FadeStartedEvent(false, fadeDuration));
+            
+            yield return new WaitForSeconds(fadeDuration);
+            
+            Debug.Log($"[SceneService] Fade transition to {stageId} completed");
+        }
+        
+        /// <summary>
+        /// 应用关卡初始旗标
+        /// </summary>
+        private static void ApplyStageFlags(StageEntry stage)
+        {
+            if (stage.initialFlags == null || stage.initialFlags.Count == 0)
+            {
+                return;
+            }
+            
+            foreach (var kvp in stage.initialFlags)
+            {
+                FlagService.SetFlag(kvp.Key, kvp.Value);
+            }
+            
+            Debug.Log($"[SceneService] Applied {stage.initialFlags.Count} initial flags for stage {stage.stageId}");
+        }
+        
+        /// <summary>
+        /// 获取所有注册的关卡 ID
+        /// </summary>
+        public static List<string> GetAllStageIds()
+        {
+            return new List<string>(_stages.Keys);
+        }
+        
+        /// <summary>
+        /// 检查关卡是否存在
+        /// </summary>
+        public static bool StageExists(string stageId)
+        {
+            return _stages.ContainsKey(stageId);
+        }
+    }
+    
+    /// <summary>
+    /// 关卡条目
+    /// </summary>
+    public class StageEntry
+    {
+        public string stageId;
+        public GameObject stageRoot;
+        public Dictionary<string, bool> initialFlags;
     }
     
     /// <summary>
@@ -132,6 +334,49 @@ namespace SpookyGame.Core
         public SceneLoadCompletedEvent(string sceneName)
         {
             SceneName = sceneName;
+        }
+    }
+    
+    /// <summary>
+    /// 关卡切换事件
+    /// </summary>
+    public class StageChangedEvent : IEvent
+    {
+        public string StageId { get; }
+        
+        public StageChangedEvent(string stageId)
+        {
+            StageId = stageId;
+        }
+    }
+    
+    /// <summary>
+    /// 转场淡入淡出事件
+    /// </summary>
+    public class FadeStartedEvent : IEvent
+    {
+        public bool FadeIn { get; } // true = 淡入黑幕, false = 淡出黑幕
+        public float Duration { get; }
+        
+        public FadeStartedEvent(bool fadeIn, float duration)
+        {
+            FadeIn = fadeIn;
+            Duration = duration;
+        }
+    }
+    
+    /// <summary>
+    /// 转场标题事件
+    /// </summary>
+    public class IntertitleEvent : IEvent
+    {
+        public string Text { get; }
+        public bool Show { get; }
+        
+        public IntertitleEvent(string text, bool show)
+        {
+            Text = text;
+            Show = show;
         }
     }
 }

@@ -1,0 +1,87 @@
+═══════════════════════════════════════════════════════
+  场景名称配置对照表
+═══════════════════════════════════════════════════════
+
+你的实际场景文件：
+📁 Assets/Scenes/
+   ├─ MainMenu.unity      ✅ 主菜单场景
+   ├─ Scene_0.unity       ✅ 游戏场景
+   └─ SampleScene.unity   ⚠️  Unity 示例场景（可删除）
+
+───────────────────────────────────────────────────────
+
+GameConfig 应该配置为：
+┌─────────────────────────────────────────────────────┐
+│  GameConfig.asset                                   │
+├─────────────────────────────────────────────────────┤
+│  Scene Names                                        │
+│  ├─ Main Menu Scene Name: "MainMenu"     ✅         │
+│  └─ Game Scene Name: "Scene_0"           ← 改这里！  │
+│                                                     │
+│  Stage Configuration                                │
+│  ├─ First Stage Id: "D1"                 ✅         │
+│  └─ Stages                                          │
+│      └─ [0]                                         │
+│          ├─ Stage Id: "D1"               ✅         │
+│          ├─ Display Name: "DAY 1"                   │
+│          └─ Intertitle: "DAY 1 · 第一天"            │
+└─────────────────────────────────────────────────────┘
+
+───────────────────────────────────────────────────────
+
+Build Settings 应该包含：
+┌─────────────────────────────────────────────────────┐
+│  File > Build Settings > Scenes In Build           │
+├─────────────────────────────────────────────────────┤
+│  ☑ [0] Assets/Scenes/MainMenu.unity                │
+│  ☑ [1] Assets/Scenes/Scene_0.unity                 │
+└─────────────────────────────────────────────────────┘
+
+───────────────────────────────────────────────────────
+
+Scene_0 场景层级应该包含：
+Scene_0
+ ├─ Shared
+ │   ├─ Bootstrap
+ │   │   └─ Bootstrap.cs
+ │   │       └─ Game Config: GameConfig.asset ✅
+ │   ├─ Main Camera
+ │   ├─ Interactor
+ │   └─ FadeScreen
+ └─ Stage_D1  ← 必须叫这个名字！
+     └─ (初始状态：禁用 ☐)
+
+═══════════════════════════════════════════════════════
+
+⚠️  常见错误：
+
+❌ GameConfig: Game Scene Name = "GameScene"
+   实际文件: Scene_0.unity
+   结果: Scene 'GameScene' couldn't be loaded
+   
+✅ 修复方法：
+   1. 打开 GameConfig.asset
+   2. 将 Game Scene Name 改为 "Scene_0"
+   3. 保存
+
+═══════════════════════════════════════════════════════
+
+✅ 修复后的正确配置：
+
+GameConfig.asset:
+  Main Menu Scene Name: "MainMenu"  ✅
+  Game Scene Name: "Scene_0"        ✅
+
+实际场景文件:
+  Assets/Scenes/MainMenu.unity      ✅
+  Assets/Scenes/Scene_0.unity       ✅
+
+Build Settings:
+  [0] MainMenu.unity                ✅
+  [1] Scene_0.unity                 ✅
+
+场景层级:
+  Scene_0 > Stage_D1                ✅
+
+═══════════════════════════════════════════════════════
+
