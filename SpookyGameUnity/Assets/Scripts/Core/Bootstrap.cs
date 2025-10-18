@@ -74,22 +74,8 @@ namespace SpookyGame.Core
                 // ========== 情况 1: 在游戏场景（有 Stage 节点）==========
                 LogDebug($"In game scene, starting first stage: {gameConfig.firstStageId}");
                 
-                // 获取首关配置
-                StageConfig firstStage = gameConfig.GetStageConfig(gameConfig.firstStageId);
-                
-                // 直接启动第一关（带转场效果）
-                if (gameConfig.showFirstStageTitle)
-                {
-                    SceneService.FadeToStage(
-                        gameConfig.firstStageId, 
-                        firstStage.intertitle, 
-                        gameConfig.defaultFadeDuration
-                    );
-                }
-                else
-                {
-                    SceneService.ActivateStage(gameConfig.firstStageId);
-                }
+                // 直接启动第一关
+                SceneService.ActivateStage(gameConfig.firstStageId);
                 
                 EventBus.Publish(new GameStateChangedEvent(GameState.Exploring));
             }
@@ -98,34 +84,14 @@ namespace SpookyGame.Core
                 // ========== 情况 2: 不在主菜单，且启用了主菜单 ==========
                 LogDebug($"Loading main menu: {gameConfig.mainMenuSceneName}");
                 
-                // 先淡入黑幕
-                EventBus.Publish(new FadeStartedEvent(true, 0.5f));
-                
-                // 延迟加载主菜单
-                StartCoroutine(LoadMainMenuDelayed(0.5f));
+                // 直接加载主菜单
+                SceneService.LoadScene(gameConfig.mainMenuSceneName);
             }
             else
             {
                 // ========== 情况 3: 已经在主菜单 ==========
                 LogDebug("Already in main menu");
-                
-                // 淡出黑幕，显示主菜单
-                EventBus.Publish(new FadeStartedEvent(false, gameConfig.defaultFadeDuration));
             }
-        }
-        
-        /// <summary>
-        /// 延迟加载主菜单
-        /// </summary>
-        private System.Collections.IEnumerator LoadMainMenuDelayed(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            
-            SceneService.LoadScene(gameConfig.mainMenuSceneName, () =>
-            {
-                // 主菜单加载完成，淡出黑幕
-                EventBus.Publish(new FadeStartedEvent(false, gameConfig.defaultFadeDuration));
-            });
         }
         
         /// <summary>

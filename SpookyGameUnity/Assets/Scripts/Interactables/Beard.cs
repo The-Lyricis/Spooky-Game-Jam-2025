@@ -22,12 +22,6 @@ namespace SpookyGame.World
         [Tooltip("目标场景")]
         [SerializeField] private string targetStageId = "D2";
         
-        [Tooltip("转场文字")]
-        [SerializeField] private string intertitle = "第二关";
-        
-        [Tooltip("转场时长")]
-        [SerializeField] private float fadeDuration = 1f;
-        
         /// <summary>
         /// 动态提示
         /// </summary>
@@ -86,7 +80,7 @@ namespace SpookyGame.World
             
             // 切换场景
             Debug.Log($"[Beard] 切换到场景: {targetStageId}");
-            SceneService.FadeToStage(targetStageId, intertitle, fadeDuration);
+            SceneService.SwitchToStage(targetStageId);
         }
     }
 }

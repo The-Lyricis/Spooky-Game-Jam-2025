@@ -216,12 +216,10 @@ namespace SpookyGame.Core
         }
         
         /// <summary>
-        /// 使用黑幕转场切换关卡
+        /// 切换关卡（直接切换，无转场动画）
         /// </summary>
         /// <param name="stageId">关卡 ID</param>
-        /// <param name="intertitle">转场标题文字（可选）</param>
-        /// <param name="fadeDuration">淡入淡出时长</param>
-        public static void FadeToStage(string stageId, string intertitle = "", float fadeDuration = 1f)
+        public static void SwitchToStage(string stageId)
         {
             if (!_isInitialized)
             {
@@ -229,44 +227,10 @@ namespace SpookyGame.Core
                 return;
             }
             
-            if (_coroutineRunner == null)
-            {
-                Debug.LogWarning("[SceneService] No coroutine runner, falling back to direct activation");
-                ActivateStage(stageId);
-                return;
-            }
-            
-            _coroutineRunner.StartCoroutine(FadeToStageCoroutine(stageId, intertitle, fadeDuration));
-        }
-        
-        /// <summary>
-        /// 黑幕转场协程
-        /// </summary>
-        private static IEnumerator FadeToStageCoroutine(string stageId, string intertitle, float fadeDuration)
-        {
-            // 发布转场开始事件
-            EventBus.Publish(new FadeStartedEvent(true, fadeDuration));
-            
-            // 等待淡入完成
-            yield return new WaitForSeconds(fadeDuration);
-            
-            // 显示标题文字
-            if (!string.IsNullOrEmpty(intertitle))
-            {
-                EventBus.Publish(new IntertitleEvent(intertitle, true));
-                yield return new WaitForSeconds(2f); // 显示 2 秒
-                EventBus.Publish(new IntertitleEvent(intertitle, false));
-            }
-            
-            // 切换关卡
+            // 直接激活关卡
             ActivateStage(stageId);
             
-            // 淡出黑幕
-            EventBus.Publish(new FadeStartedEvent(false, fadeDuration));
-            
-            yield return new WaitForSeconds(fadeDuration);
-            
-            Debug.Log($"[SceneService] Fade transition to {stageId} completed");
+            Debug.Log($"[SceneService] Switched to stage: {stageId}");
         }
         
         /// <summary>
@@ -367,33 +331,4 @@ namespace SpookyGame.Core
         }
     }
     
-    /// <summary>
-    /// 转场淡入淡出事件
-    /// </summary>
-    public class FadeStartedEvent : IEvent
-    {
-        public bool FadeIn { get; } // true = 淡入黑幕, false = 淡出黑幕
-        public float Duration { get; }
-        
-        public FadeStartedEvent(bool fadeIn, float duration)
-        {
-            FadeIn = fadeIn;
-            Duration = duration;
-        }
-    }
-    
-    /// <summary>
-    /// 转场标题事件
-    /// </summary>
-    public class IntertitleEvent : IEvent
-    {
-        public string Text { get; }
-        public bool Show { get; }
-        
-        public IntertitleEvent(string text, bool show)
-        {
-            Text = text;
-            Show = show;
-        }
-    }
 }
