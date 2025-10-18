@@ -12,29 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ede37f3e9e2aabc419923456897d4e11, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
-  mainMenuSceneAsset: {fileID: 102900000, guid: f06344cbb2b2ff8459dafadb077537cf, type: 3}
-  gameSceneAsset: {fileID: 102900000, guid: f86ee9eb1796a6c4c939829a7d56abe6, type: 3}
   mainMenuSceneName: MainMenu
   gameSceneName: Scene_0
-  firstStageId: D1
+  firstStageId: D0
   stages:
+  - stageId: D0
+    displayName: DAY 0
+    initialFlags: []
   - stageId: D1
     displayName: DAY 1
-    intertitle: "DAY 1 \xB7 \u7B2C\u4E00\u5929"
     initialFlags: []
   - stageId: D2
     displayName: DAY 2
-    intertitle: "DAY 2 \xB7 \u7B2C\u4E8C\u5929"
     initialFlags: []
   - stageId: D3
     displayName: DAY 3
-    intertitle: "DAY 3 \xB7 \u7B2C\u4E09\u5929"
     initialFlags: []
   - stageId: D4
     displayName: DAY 4
-    intertitle: "DAY 4 \xB7 \u6700\u7EC8\u65E5"
     initialFlags: []
-  defaultFadeDuration: 1
-  intertitleDuration: 2
   useMainMenu: 1
-  showFirstStageTitle: 1

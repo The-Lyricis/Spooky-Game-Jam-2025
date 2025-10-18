@@ -23,25 +23,15 @@ namespace SpookyGame.Core
         [Tooltip("所有关卡配置")]
         public StageConfig[] stages = new StageConfig[]
         {
-            new StageConfig { stageId = "D1", displayName = "DAY 1", intertitle = "DAY 1 · 第一天" },
-            new StageConfig { stageId = "D2", displayName = "DAY 2", intertitle = "DAY 2 · 第二天" },
-            new StageConfig { stageId = "D3", displayName = "DAY 3", intertitle = "DAY 3 · 第三天" },
-            new StageConfig { stageId = "D4", displayName = "DAY 4", intertitle = "DAY 4 · 最终日" },
+            new StageConfig { stageId = "D1", displayName = "DAY 1" },
+            new StageConfig { stageId = "D2", displayName = "DAY 2" },
+            new StageConfig { stageId = "D3", displayName = "DAY 3" },
+            new StageConfig { stageId = "D4", displayName = "DAY 4" },
         };
-        
-        [Header("Transition Settings")]
-        [Tooltip("默认转场时长")]
-        public float defaultFadeDuration = 1f;
-        
-        [Tooltip("标题显示时长")]
-        public float intertitleDuration = 2f;
         
         [Header("Game Settings")]
         [Tooltip("是否使用主菜单")]
         public bool useMainMenu = true;
-        
-        [Tooltip("是否在启动时显示首个关卡标题")]
-        public bool showFirstStageTitle = true;
         
         /// <summary>
         /// 获取关卡配置
@@ -57,7 +47,7 @@ namespace SpookyGame.Core
             }
             
             Debug.LogWarning($"[GameConfig] Stage {stageId} not found in config");
-            return new StageConfig { stageId = stageId, displayName = stageId, intertitle = stageId };
+            return new StageConfig { stageId = stageId, displayName = stageId };
         }
         
         /// <summary>
@@ -96,9 +86,6 @@ namespace SpookyGame.Core
         
         [Tooltip("显示名称")]
         public string displayName;
-        
-        [Tooltip("转场标题")]
-        public string intertitle;
         
         [Tooltip("关卡初始旗标")]
         public FlagEntry[] initialFlags = new FlagEntry[0];
