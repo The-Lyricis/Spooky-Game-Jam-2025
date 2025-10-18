@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d19e663d3bbccd499e51125d51f7629, type: 3}
   m_Name: WhosLilaRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     effectMaterial: {fileID: 2100000, guid: 214e73f340061984da6443ba43fa64af, type: 2}
     renderPassEvent: 550
     pixelSize: 1000
-    colorCount: 14
+    colorCount: 13
     contrast: 0.5
-    brightness: -0.375
+    brightness: -0.5
     saturation: 1.17
-    ditherStrength: 0.208
+    ditherStrength: 0.5
     ditherScale: 1.37
     scanlineIntensity: 0
     scanlineCount: 442
-    noiseAmount: 0.02
+    noiseAmount: 0.022
     vignette: 1
     grainSize: 3.94
     grainAmount: 0

@@ -1,56 +1,56 @@
 using UnityEngine;
+using SpookyGame.World;
 using SpookyGame.UI;
 using SpookyGame.Core;
+using System.Collections;
 
 namespace SpookyGame.D0Scene
 {
     /// <summary>
     /// D0 场景 - 照片检视
-    /// 点击后显示照片特写，并设置检视旗标
+    /// 继承自 InspectableObject，点击后显示照片特写并设置检视旗标
     /// </summary>
-    [RequireComponent(typeof(Collider2D))]
-    public class PhotoInspection : MonoBehaviour
+    public class PhotoInspection : InspectableObject
     {
-        [Header("Photo Settings")]
-        [Tooltip("照片特写图")]
-        [SerializeField] private Sprite photoCloseup;
+        private CloseupViewUI _closeupUI;
         
-        [Header("UI Reference")]
-        [SerializeField] private CloseupViewUI closeupUI;
-        [SerializeField] private bool autoFindUI = true;
-        
-        private void Start()
+        protected override void Awake()
         {
-            // 自动查找特写 UI
-            if (autoFindUI && closeupUI == null)
+            base.Awake();
+            
+            // 查找 CloseupViewUI
+            _closeupUI = FindObjectOfType<CloseupViewUI>();
+            if (_closeupUI == null)
             {
-                closeupUI = FindObjectOfType<CloseupViewUI>();
-                if (closeupUI == null)
-                {
-                    Debug.LogError("[PhotoInspection] CloseupViewUI not found in scene!");
-                }
+                Debug.LogError("[PhotoInspection] CloseupViewUI not found in scene!");
             }
         }
         
-        private void OnMouseDown()
+        protected override void OnInteract(GameObject actor)
         {
-            // 检查是否已经检视过
-            if (FlagService.GetFlag("inspected.photo"))
+            // 调用父类显示特写
+            base.OnInteract(actor);
+            
+            Debug.Log("[PhotoInspection] Showing photo closeup...");
+            
+            // 等待特写关闭后再设置旗标
+            StartCoroutine(WaitForCloseupClose());
+        }
+        
+        private IEnumerator WaitForCloseupClose()
+        {
+            // 等待一帧，确保特写已经显示
+            yield return null;
+            
+            // 等待特写关闭
+            while (_closeupUI != null && _closeupUI.IsVisible)
             {
-                Debug.Log("[PhotoInspection] Already inspected.");
-                // 仍然可以再次查看
+                yield return null;
             }
             
-            // 显示特写
-            if (closeupUI != null && photoCloseup != null)
-            {
-                closeupUI.ShowCloseup(photoCloseup);
-                Debug.Log("[PhotoInspection] Showing photo closeup.");
-            }
-            
-            // 设置检视旗标
+            // 特写关闭后设置旗标
             FlagService.SetFlag("inspected.photo", true);
-            Debug.Log("[PhotoInspection] Set flag: inspected.photo = true");
+            Debug.Log("[PhotoInspection] Closeup closed. Set flag: inspected.photo = true");
         }
     }
 }
