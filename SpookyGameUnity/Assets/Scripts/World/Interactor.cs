@@ -6,7 +6,7 @@ using SpookyGame.Core;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpookyGame.Player
+namespace SpookyGame.World
 {
     /// <summary>
     /// 点击式交互管理器
