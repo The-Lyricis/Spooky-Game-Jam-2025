@@ -85,6 +85,18 @@ namespace SpookyGame.World
             // 更新悬停对象
             if (_hoveredInteractable != newInteractable)
             {
+                // 退出旧的悬停对象
+                if (_hoveredInteractable != null)
+                {
+                    _hoveredInteractable.OnHoverExit();
+                }
+                
+                // 进入新的悬停对象
+                if (newInteractable != null)
+                {
+                    newInteractable.OnHoverEnter();
+                }
+                
                 _hoveredInteractable = newInteractable;
                 UpdatePrompt();
                 UpdateCursor();

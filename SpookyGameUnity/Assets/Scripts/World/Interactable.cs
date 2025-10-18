@@ -119,6 +119,32 @@ namespace SpookyGame.World
         protected abstract void OnInteract(GameObject actor);
         
         /// <summary>
+        /// 鼠标悬停进入时调用（用于高亮等视觉反馈）
+        /// </summary>
+        public virtual void OnHoverEnter()
+        {
+            // 自动查找并触发 HoverOutline
+            var outline = GetComponent<HoverOutline>();
+            if (outline != null)
+            {
+                outline.ShowGlow();
+            }
+        }
+        
+        /// <summary>
+        /// 鼠标悬停离开时调用
+        /// </summary>
+        public virtual void OnHoverExit()
+        {
+            // 自动查找并停止 HoverOutline
+            var outline = GetComponent<HoverOutline>();
+            if (outline != null)
+            {
+                outline.HideGlow();
+            }
+        }
+        
+        /// <summary>
         /// 重置交互状态
         /// </summary>
         public virtual void ResetInteraction()
@@ -156,7 +182,7 @@ namespace SpookyGame.World
             Collider2D col = GetComponent<Collider2D>();
             if (col != null)
             {
-                Gizmos.color = new Color(1, 1, 0, 0.3f); // 半透明绿色
+                Gizmos.color = new Color(1, 1, 0, 0.3f); // 半透明黄色
                 Gizmos.DrawCube(col.bounds.center, col.bounds.size);
             }
         }
