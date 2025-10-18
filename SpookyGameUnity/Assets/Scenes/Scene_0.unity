@@ -3516,7 +3516,7 @@ Transform:
   m_GameObject: {fileID: 876513652}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.5985551, y: -1.4024245, z: 5.796762}
+  m_LocalPosition: {x: -0.66, y: -1.4024245, z: 5.796762}
   m_LocalScale: {x: 1.9648, y: 1.9648, z: 1.9648}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7886,10 +7886,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f119b0d8a0621c54b97ceb19d1af023d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultMusic: {fileID: 8300000, guid: 59b00bef18b1b87479a977c3f49aee0b, type: 3}
+  defaultMusic: {fileID: 8300000, guid: 00aed2c08a159b042805b37e79a1de74, type: 3}
   playOnAwake: 1
   loop: 1
-  volume: 0.5
+  volume: 0.373
   minVolume: 0
   maxVolume: 1
   fadeInDuration: 2
