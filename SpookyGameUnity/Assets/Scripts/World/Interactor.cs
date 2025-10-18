@@ -208,37 +208,37 @@ namespace SpookyGame.Player
         /// </summary>
         private void UpdatePrompt()
         {
-            if (_hoveredInteractable != null)
-            {
-                // 使用 CurrentPrompt 支持动态提示文本
-                string newPrompt = _hoveredInteractable.CurrentPrompt;
+            // if (_hoveredInteractable != null)
+            // {
+            //     // 使用 CurrentPrompt 支持动态提示文本
+            //     string newPrompt = _hoveredInteractable.CurrentPrompt;
                 
-                // 只有文本变化或首次显示时才发布事件
-                if (newPrompt != _currentPromptText)
-                {
-                    _currentPromptText = newPrompt;
-                    EventBus.Publish(new PromptEvent(newPrompt, true));
+            //     // 只有文本变化或首次显示时才发布事件
+            //     if (newPrompt != _currentPromptText)
+            //     {
+            //         _currentPromptText = newPrompt;
+            //         EventBus.Publish(new PromptEvent(newPrompt, true));
                     
-                    if (showDebugInfo)
-                    {
-                        Debug.Log($"[Interactor] Prompt updated: {newPrompt}");
-                    }
-                }
-            }
-            else
-            {
-                // 清空提示
-                if (!string.IsNullOrEmpty(_currentPromptText))
-                {
-                    _currentPromptText = "";
-                    EventBus.Publish(new PromptEvent("", false));
+            //         if (showDebugInfo)
+            //         {
+            //             Debug.Log($"[Interactor] Prompt updated: {newPrompt}");
+            //         }
+            //     }
+            // }
+            // else
+            // {
+            //     // 清空提示
+            //     if (!string.IsNullOrEmpty(_currentPromptText))
+            //     {
+            //         _currentPromptText = "";
+            //         EventBus.Publish(new PromptEvent("", false));
                     
-                    if (showDebugInfo)
-                    {
-                        Debug.Log("[Interactor] Prompt hidden");
-                    }
-                }
-            }
+            //         if (showDebugInfo)
+            //         {
+            //             Debug.Log("[Interactor] Prompt hidden");
+            //         }
+            //     }
+            // }
         }
         
         /// <summary>

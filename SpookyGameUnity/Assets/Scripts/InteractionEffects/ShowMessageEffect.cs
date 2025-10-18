@@ -24,7 +24,7 @@ namespace SpookyGame.World.InteractionEffects
             }
             
             // 发送消息事件
-            EventBus.Publish(new MessageEvent(message, displayDuration));
+            EventBus.Publish(new PromptEvent(message, true));
             
             if (useDebugLog)
             {
@@ -36,16 +36,5 @@ namespace SpookyGame.World.InteractionEffects
     /// <summary>
     /// 消息事件（需要在EventBus中使用）
     /// </summary>
-    public class MessageEvent : IEvent
-    {
-        public string Message { get; }
-        public float Duration { get; }
-        
-        public MessageEvent(string message, float duration = 3f)
-        {
-            Message = message;
-            Duration = duration;
-        }
-    }
 }
 

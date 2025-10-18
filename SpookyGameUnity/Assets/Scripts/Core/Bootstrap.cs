@@ -25,11 +25,13 @@ namespace SpookyGame.Core
             }
             
             DontDestroyOnLoad(gameObject);
+            
+            // 在 Awake 中初始化服务，确保在所有 Start() 之前完成
+            InitializeServices();
         }
         
         private void Start()
         {
-            InitializeServices();
             LoadFirstScene();
         }
         

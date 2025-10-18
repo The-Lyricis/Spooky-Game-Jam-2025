@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using SpookyGame.Core;
 
 namespace SpookyGame.UI
@@ -12,15 +11,20 @@ namespace SpookyGame.UI
     {
         [Header("UI References")]
         [SerializeField] private GameObject promptPanel;
-        [SerializeField] private TextMeshProUGUI promptText;
+        [SerializeField] private Text promptText;
         [SerializeField] private Image promptIcon;
         
         [Header("Animation Settings")]
         [SerializeField] private float fadeInDuration = 0.2f;
         [SerializeField] private float fadeOutDuration = 0.2f;
         
+        [Header("Auto Hide Settings")]
+        [SerializeField] private bool autoHide = true;
+        [SerializeField] private float displayDuration = 3f;
+        
         private CanvasGroup _canvasGroup;
         private bool _isVisible = false;
+        private Coroutine _autoHideCoroutine;
         
         private void Awake()
         {
@@ -50,6 +54,9 @@ namespace SpookyGame.UI
         
         private void OnDestroy()
         {
+            // 停止自动隐藏计时器
+            StopAutoHideTimer();
+            
             // 取消订阅提示事件
             EventBus.Unsubscribe<PromptEvent>(this);
         }
@@ -60,6 +67,7 @@ namespace SpookyGame.UI
         /// <param name="eventData">提示事件数据</param>
         public void Handle(PromptEvent eventData)
         {
+            Debug.Log("PromptEvent: " + eventData.PromptText);
             if (eventData.IsVisible && !string.IsNullOrEmpty(eventData.PromptText))
             {
                 ShowPrompt(eventData.PromptText);
@@ -76,15 +84,21 @@ namespace SpookyGame.UI
         /// <param name="text">提示文本</param>
         private void ShowPrompt(string text)
         {
-            if (_isVisible) return;
-            
-            _isVisible = true;
-            
-            // 设置提示文本
+            // 设置提示文本（允许更新文本，即使已经显示）
             if (promptText != null)
             {
                 promptText.text = text;
             }
+            
+            // 如果已经显示，重置自动隐藏计时器
+            if (_isVisible) 
+            {
+                Debug.Log($"[PromptUI] Updating prompt text: {text}");
+                RestartAutoHideTimer();
+                return;
+            }
+            
+            _isVisible = true;
             
             // 显示面板
             if (promptPanel != null)
@@ -94,6 +108,12 @@ namespace SpookyGame.UI
             
             // 播放淡入动画
             StartCoroutine(FadeIn());
+            
+            // 启动自动隐藏计时器
+            if (autoHide)
+            {
+                RestartAutoHideTimer();
+            }
             
             Debug.Log($"[PromptUI] Showing prompt: {text}");
         }
@@ -106,6 +126,9 @@ namespace SpookyGame.UI
             if (!_isVisible) return;
             
             _isVisible = false;
+            
+            // 停止自动隐藏计时器
+            StopAutoHideTimer();
             
             // 播放淡出动画
             StartCoroutine(FadeOut());
@@ -177,6 +200,44 @@ namespace SpookyGame.UI
                 promptIcon.sprite = sprite;
                 promptIcon.gameObject.SetActive(sprite != null);
             }
+        }
+        
+        /// <summary>
+        /// 重启自动隐藏计时器
+        /// </summary>
+        private void RestartAutoHideTimer()
+        {
+            // 先停止之前的计时器
+            StopAutoHideTimer();
+            
+            // 启动新的计时器
+            if (autoHide)
+            {
+                _autoHideCoroutine = StartCoroutine(AutoHideCoroutine());
+            }
+        }
+        
+        /// <summary>
+        /// 停止自动隐藏计时器
+        /// </summary>
+        private void StopAutoHideTimer()
+        {
+            if (_autoHideCoroutine != null)
+            {
+                StopCoroutine(_autoHideCoroutine);
+                _autoHideCoroutine = null;
+            }
+        }
+        
+        /// <summary>
+        /// 自动隐藏协程
+        /// </summary>
+        private System.Collections.IEnumerator AutoHideCoroutine()
+        {
+            yield return new WaitForSeconds(displayDuration);
+            
+            Debug.Log($"[PromptUI] Auto-hiding after {displayDuration} seconds");
+            HidePrompt();
         }
     }
 }
