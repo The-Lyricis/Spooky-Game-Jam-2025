@@ -9,8 +9,11 @@ namespace SpookyGame.Core
     /// </summary>
     public class Bootstrap : MonoBehaviour
     {
-        [Header("Game Settings")]
-        [SerializeField] private string firstSceneName = "Scene_0";
+        [Header("Game Configuration")]
+        [SerializeField] private GameConfig gameConfig;
+        
+        [Header("Runtime Info (Debug)")]
+        [SerializeField] private bool showDebugInfo = true;
         
         private void Awake()
         {
@@ -38,9 +41,8 @@ namespace SpookyGame.Core
             // 初始化事件总线
             EventBus.Initialize();
             
-            // 初始化场景服务
-            SceneService.Initialize();
-            
+            // 初始化场景服务（传入 this 作为协程运行器）
+            SceneService.Initialize(this);
             
             // 初始化旗标服务
             FlagService.Initialize();
@@ -56,19 +58,83 @@ namespace SpookyGame.Core
         /// </summary>
         private void LoadFirstScene()
         {
-            Debug.Log($"[Bootstrap] Loading first scene: {firstSceneName}");
-            
-            // 发布游戏状态变化事件
-            EventBus.Publish(new GameStateChangedEvent(GameState.Loading));
-            
-            // 加载首关
-            SceneService.LoadScene(firstSceneName, () =>
+            if (gameConfig == null)
             {
-                // 切换到探索状态
-                EventBus.Publish(new GameStateChangedEvent(GameState.Exploring));
+                Debug.LogError("[Bootstrap] GameConfig is not assigned!");
+                return;
+            }
+            
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            
+            // 检查当前场景类型
+            if (SceneService.GetAllStageIds().Count > 0)
+            {
+                // ========== 情况 1: 在游戏场景（有 Stage 节点）==========
+                LogDebug($"In game scene, starting first stage: {gameConfig.firstStageId}");
                 
-                Debug.Log("[Bootstrap] First scene loaded");
+                // 获取首关配置
+                StageConfig firstStage = gameConfig.GetStageConfig(gameConfig.firstStageId);
+                
+                // 直接启动第一关（带转场效果）
+                if (gameConfig.showFirstStageTitle)
+                {
+                    SceneService.FadeToStage(
+                        gameConfig.firstStageId, 
+                        firstStage.intertitle, 
+                        gameConfig.defaultFadeDuration
+                    );
+                }
+                else
+                {
+                    SceneService.ActivateStage(gameConfig.firstStageId);
+                }
+                
+                EventBus.Publish(new GameStateChangedEvent(GameState.Exploring));
+            }
+            else if (gameConfig.useMainMenu && currentSceneName != gameConfig.MainMenuSceneName)
+            {
+                // ========== 情况 2: 不在主菜单，且启用了主菜单 ==========
+                LogDebug($"Loading main menu: {gameConfig.MainMenuSceneName}");
+                
+                // 先淡入黑幕
+                EventBus.Publish(new FadeStartedEvent(true, 0.5f));
+                
+                // 延迟加载主菜单
+                StartCoroutine(LoadMainMenuDelayed(0.5f));
+            }
+            else
+            {
+                // ========== 情况 3: 已经在主菜单 ==========
+                LogDebug("Already in main menu");
+                
+                // 淡出黑幕，显示主菜单
+                EventBus.Publish(new FadeStartedEvent(false, gameConfig.defaultFadeDuration));
+            }
+        }
+        
+        /// <summary>
+        /// 延迟加载主菜单
+        /// </summary>
+        private System.Collections.IEnumerator LoadMainMenuDelayed(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            
+            SceneService.LoadScene(gameConfig.MainMenuSceneName, () =>
+            {
+                // 主菜单加载完成，淡出黑幕
+                EventBus.Publish(new FadeStartedEvent(false, gameConfig.defaultFadeDuration));
             });
+        }
+        
+        /// <summary>
+        /// 调试日志
+        /// </summary>
+        private void LogDebug(string message)
+        {
+            if (showDebugInfo)
+            {
+                Debug.Log($"[Bootstrap] {message}");
+            }
         }
     }
 }
