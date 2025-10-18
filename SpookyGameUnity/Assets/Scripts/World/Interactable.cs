@@ -156,7 +156,7 @@ namespace SpookyGame.World
             Collider2D col = GetComponent<Collider2D>();
             if (col != null)
             {
-                Gizmos.color = new Color(0, 1, 0, 0.3f); // 半透明绿色
+                Gizmos.color = new Color(1, 1, 0, 0.3f); // 半透明绿色
                 Gizmos.DrawCube(col.bounds.center, col.bounds.size);
             }
         }
