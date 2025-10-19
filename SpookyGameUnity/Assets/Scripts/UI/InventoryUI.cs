@@ -125,11 +125,11 @@ namespace SpookyGame.UI
                     return BirdSkullIcon;
                 case "bird":
                     return BirdIcon;
-                case "Teeth":
+                case "tooth":
                     return TeethIcon;
                 case "Hairs":
                     return HairsIcon;
-                case "Scissor":
+                case "scissors":
                     return ScissorIcon;
                 // 未来添加更多工具
                 // case "scissors":

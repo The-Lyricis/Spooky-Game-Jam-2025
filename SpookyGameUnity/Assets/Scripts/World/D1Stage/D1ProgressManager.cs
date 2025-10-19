@@ -1,6 +1,7 @@
 using UnityEngine;
 using SpookyGame.Core;
 using SpookyGame.UI;
+using System.Collections;
 
 namespace SpookyGame.D1Scene
 {
@@ -20,6 +21,9 @@ namespace SpookyGame.D1Scene
         
         [Tooltip("自动查找对话系统")]
         [SerializeField] private bool autoFindDialogueSystem = true;
+        
+        [Tooltip("开场对话延迟时间（秒）- 等待场景切换动画完成")]
+        [SerializeField] private float openingDialogueDelay = 2f;
         
         [Tooltip("开场对话")]
         [TextArea(2, 5)]
@@ -45,6 +49,7 @@ namespace SpookyGame.D1Scene
         [SerializeField] private string stageChangeStr = "Day 2";
         
         private bool _hasShaved = false;
+        private bool _openingDialogueShown = false;
         
         private void Start()
         {
@@ -59,8 +64,22 @@ namespace SpookyGame.D1Scene
                 objectA.SetActive(false);
             }
             
-            // 显示开场对话
-            ShowOpeningDialogue();
+            // 延迟显示开场对话，等待场景切换动画完成
+            StartCoroutine(WaitAndShowOpeningDialogue());
+        }
+        
+        /// <summary>
+        /// 等待场景切换完成后显示开场对话
+        /// </summary>
+        private IEnumerator WaitAndShowOpeningDialogue()
+        {
+            yield return new WaitForSeconds(openingDialogueDelay);
+            
+            if (!_openingDialogueShown)
+            {
+                _openingDialogueShown = true;
+                ShowOpeningDialogue();
+            }
         }
         
         private void Update()
