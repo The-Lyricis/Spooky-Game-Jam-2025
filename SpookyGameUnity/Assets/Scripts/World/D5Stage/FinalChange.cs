@@ -18,6 +18,8 @@ public class FinalChange : Interactable
     private SpriteRenderer _spriteRenderer;
     private int _currentSpriteIndex = 0;
     private int Index = 0;
+
+    bool isInteract = false;
     
     protected override void Awake()
     {
@@ -56,6 +58,7 @@ public class FinalChange : Interactable
         }
         else
         {
+            if(isInteract) return;
             string[] dialogueLines = { "Eyes, I shall not have." };
             // 假设有一个 DialogueSystem 类型的组件已被分配，可以通过 GetComponent 或拖拽到 Inspector
             DialogueSystem dialogueSystem = FindObjectOfType<DialogueSystem>();
@@ -63,6 +66,7 @@ public class FinalChange : Interactable
             {
                 dialogueSystem.StartDialogue(dialogueLines, null);
             }
+            isInteract = true;
         }
     }
     /// 切换图片

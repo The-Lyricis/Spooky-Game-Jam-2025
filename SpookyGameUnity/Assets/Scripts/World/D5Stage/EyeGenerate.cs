@@ -80,6 +80,7 @@ public class EyeGenerate : MonoBehaviour
     private bool _isGenerating = false;
     private int _currentEyeIndex = 0;
     private Coroutine _generationCoroutine;
+    [SerializeField] private GameObject EndPanel;
     
     void Start()
     {
@@ -112,6 +113,7 @@ public class EyeGenerate : MonoBehaviour
         
         yield return new WaitForSeconds(1f);
         //
+        EndPanel.SetActive(true);
         //
 
     }
