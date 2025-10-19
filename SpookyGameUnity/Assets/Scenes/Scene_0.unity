@@ -342,7 +342,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 568510313a47a0942a029143835ed082, type: 3}
-    m_FontSize: 100
+    m_FontSize: 180
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -723,11 +723,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 194525959219735205, guid: 80f3cb502b01a674b8f75dc774d6d289, type: 3}
   m_PrefabInstance: {fileID: 1817949243}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &716227802 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7688928214612967235, guid: 2b100a277171591459707abbdf94c74e, type: 3}
-  m_PrefabInstance: {fileID: 3892264379134384993}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &892975019 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6068593935933258835, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
@@ -761,7 +756,6 @@ MonoBehaviour:
   - "\u6307\u7532\u526A\u597D\u4E86\u3002"
   - "\u53EF\u4EE5\u7EE7\u7EED\u4E86\u3002"
   nextStageId: D4
-  stageChangeStr: Day 4
   fadeDuration: 1
   transitionTexts:
   - Day 4
@@ -1064,8 +1058,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nextStageId: D3
-  stageChangeStr: Day 3
   transitionDuration: 1
+  transitionTexts:
+  - Day 3
 --- !u!1 &1341806938 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8566704270401393815, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
@@ -1792,35 +1787,6 @@ MonoBehaviour:
   nextStageId: D1
   transitionTexts:
   - Day 1
---- !u!1 &2144439643 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 36804524205743741, guid: 2b100a277171591459707abbdf94c74e, type: 3}
-  m_PrefabInstance: {fileID: 3892264379134384993}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2144439645
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2144439643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42ba261dd99f9084ebf325974d504e25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectA: {fileID: 716227802}
-  dialogueSystem: {fileID: 0}
-  autoFindDialogueSystem: 1
-  openingDialogueDelay: 2
-  openingDialogueLines:
-  - Mess, I shall clean.
-  endingDialogueLines:
-  - "\u522E\u4E86\u80E1\u5B50\uFF0C\u611F\u89C9\u6E05\u723D\u591A\u4E86\u3002"
-  nextStageId: D2
-  stageChangeStr: Day 2
-  transitionTexts:
-  - Day 2
 --- !u!1001 &754295492262531729
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1835,7 +1801,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 532239418331041053, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 675611847355877460, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
       propertyPath: closeupUI
@@ -1958,13 +1924,29 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 954783932839524893, guid: ce88df90e50e64344a37e9f1b2f46878, type: 3}
+      propertyPath: bounceCountRange.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 954783932839524893, guid: ce88df90e50e64344a37e9f1b2f46878, type: 3}
+      propertyPath: fallDistanceRange.x
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 954783932839524893, guid: ce88df90e50e64344a37e9f1b2f46878, type: 3}
+      propertyPath: fallDistanceRange.y
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 954783932839524893, guid: ce88df90e50e64344a37e9f1b2f46878, type: 3}
+      propertyPath: bounceStrengthRange.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6138922631633173318, guid: ce88df90e50e64344a37e9f1b2f46878, type: 3}
       propertyPath: m_Name
       value: Stage_D2
       objectReference: {fileID: 0}
     - target: {fileID: 6138922631633173318, guid: ce88df90e50e64344a37e9f1b2f46878, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1985,18 +1967,6 @@ PrefabInstance:
     - target: {fileID: 36804524205743741, guid: 2b100a277171591459707abbdf94c74e, type: 3}
       propertyPath: m_Name
       value: Stage_D1
-      objectReference: {fileID: 0}
-    - target: {fileID: 36804524205743741, guid: 2b100a277171591459707abbdf94c74e, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 651638652185768759, guid: 2b100a277171591459707abbdf94c74e, type: 3}
-      propertyPath: fadeOutDuration
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 651638652185768759, guid: 2b100a277171591459707abbdf94c74e, type: 3}
-      propertyPath: noRazorDialogueLines.Array.data[0]
-      value: Need razor
       objectReference: {fileID: 0}
     - target: {fileID: 1816477860806951337, guid: 2b100a277171591459707abbdf94c74e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2039,13 +2009,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 3863610890689214186, guid: 2b100a277171591459707abbdf94c74e, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 36804524205743741, guid: 2b100a277171591459707abbdf94c74e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2144439645}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2b100a277171591459707abbdf94c74e, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

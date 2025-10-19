@@ -14,18 +14,21 @@ namespace SpookyGame.D2Scene
         [Tooltip("对话结束后切换的关卡")]
         [SerializeField] private string nextStageId = "D3";
         
-        [Tooltip("场景切换提示文字")]
-        [SerializeField] private string stageChangeStr = "Day 3";
-        
         [Tooltip("转场时长（秒）")]
         [SerializeField] private float transitionDuration = 1f;
+        
+        [Tooltip("场景切换提示文字")]
+        [SerializeField] private string[] transitionTexts = new string[]
+        {
+            "Day 3"
+        };
         
         /// <summary>
         /// 手动触发转场（供其他脚本调用）
         /// </summary>
         public void TriggerTransition()
         {
-            SceneService.FadeToStage(nextStageId, transitionDuration, new string[] { stageChangeStr });
+            SceneService.FadeToStage(nextStageId, transitionDuration, transitionTexts);
         }
         
         /// <summary>

@@ -35,6 +35,11 @@ namespace SpookyGame.UI
         private string[] _texts;
         private int _currentTextIndex = 0;
         
+        // 防重复点击保护
+        private bool _isProcessingClick = false;
+        private float _lastClickTime = 0f;
+        private const float CLICK_COOLDOWN = 0.3f; // 点击冷却时间
+        
         private void Awake()
         {
             // 获取或添加 CanvasGroup
@@ -68,15 +73,32 @@ namespace SpookyGame.UI
         {
             if (!_isVisible) return;
             
-            // 如果正在打字且允许跳过
-            if (_isTyping && skipOnClick && UnityEngine.Input.GetMouseButtonDown(0))
+            // 防止重复点击 - 添加点击冷却和状态保护
+            if (UnityEngine.Input.GetMouseButtonDown(0))
             {
-                SkipTypewriter();
-            }
-            // 如果等待点击
-            else if (_isWaitingForClick && UnityEngine.Input.GetMouseButtonDown(0))
-            {
-                OnClickToContinue();
+                float currentTime = Time.unscaledTime;
+                
+                // 检查点击冷却时间
+                if (currentTime - _lastClickTime < CLICK_COOLDOWN)
+                {
+                    Debug.Log("[TransitionTextUI] Click ignored - too fast");
+                    return;
+                }
+                
+                // 检查是否正在处理点击
+                if (_isProcessingClick)
+                {
+                    Debug.Log("[TransitionTextUI] Click ignored - already processing");
+                    return;
+                }
+                
+                _lastClickTime = currentTime;
+                
+                // 如果等待点击（转场文字不使用打字机效果）
+                if (_isWaitingForClick)
+                {
+                    OnClickToContinue();
+                }
             }
         }
         
@@ -86,6 +108,14 @@ namespace SpookyGame.UI
         public void Handle(TransitionTextEvent eventData)
         {
             Debug.Log($"[TransitionTextUI] Received TransitionTextEvent: Show={eventData.Show}, Texts={eventData.Texts?.Length ?? 0}");
+            
+            if (eventData.Texts != null)
+            {
+                for (int i = 0; i < eventData.Texts.Length; i++)
+                {
+                    Debug.Log($"[TransitionTextUI] Text {i}: '{eventData.Texts[i]}'");
+                }
+            }
             
             if (eventData.Show)
             {
@@ -166,16 +196,21 @@ namespace SpookyGame.UI
         }
         
         /// <summary>
-        /// 显示序列：淡入 -> 打字 -> 等待点击
+        /// 显示序列：淡入 -> 直接显示文字 -> 等待点击
         /// </summary>
         private IEnumerator ShowSequence(string text)
         {
             // 淡入
             yield return StartCoroutine(FadeIn());
             
-            // 打字机效果
-            _typewriterCoroutine = StartCoroutine(TypewriterEffect(text));
-            yield return _typewriterCoroutine;
+            // 直接设置完整文字（不使用打字机效果）
+            if (transitionText != null)
+            {
+                transitionText.text = text;
+            }
+            
+            // 淡入文字
+            yield return StartCoroutine(FadeInText());
             
             // 等待玩家点击
             _isWaitingForClick = true;
@@ -231,6 +266,13 @@ namespace SpookyGame.UI
         /// </summary>
         private void OnClickToContinue()
         {
+            if (_isProcessingClick)
+            {
+                Debug.LogWarning("[TransitionTextUI] Already processing click, ignoring");
+                return;
+            }
+            
+            _isProcessingClick = true;
             _isWaitingForClick = false;
             
             Debug.Log("[TransitionTextUI] Player clicked to continue");
@@ -289,14 +331,17 @@ namespace SpookyGame.UI
             
             // 显示下一个文字
             ShowCurrentText();
+            
+            // 重置处理状态，允许下次点击
+            _isProcessingClick = false;
         }
         
         /// <summary>
-        /// 只显示文字（不包含黑幕淡入）
+        /// 只显示文字（不包含黑幕淡入，不使用打字机效果）
         /// </summary>
         private IEnumerator ShowTextOnly(string text)
         {
-            // 设置文字内容
+            // 直接设置完整文字内容
             if (transitionText != null)
             {
                 transitionText.text = text;
@@ -307,6 +352,9 @@ namespace SpookyGame.UI
             
             // 等待玩家点击
             _isWaitingForClick = true;
+            
+            // 重置处理状态，允许下次点击
+            _isProcessingClick = false;
         }
         
         /// <summary>
@@ -422,6 +470,9 @@ namespace SpookyGame.UI
             yield return StartCoroutine(FadeOut());
             
             _isVisible = false;
+            
+            // 重置处理状态
+            _isProcessingClick = false;
             
             // 发布转场淡出完成事件
             EventBus.Publish(new TransitionFadeOutCompleteEvent(SceneService.CurrentStageId));

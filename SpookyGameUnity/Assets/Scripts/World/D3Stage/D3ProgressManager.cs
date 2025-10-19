@@ -47,9 +47,6 @@ namespace SpookyGame.D3Scene
         [Tooltip("对话结束后切换的关卡")]
         [SerializeField] private string nextStageId = "D4";
         
-        [Tooltip("场景切换提示文字")]
-        [SerializeField] private string stageChangeStr = "Day 4";
-        
         [Tooltip("黑幕淡入淡出时长（秒）")]
         [SerializeField] private float fadeDuration = 1f;
         

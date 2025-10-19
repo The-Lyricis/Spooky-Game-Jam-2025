@@ -317,10 +317,10 @@ namespace SpookyGame.Core
                 return;
             }
 
-            // 强制要求有文字（按你需求去掉无文字写法）
+            // 如果没有提供转场文字，使用默认文字
             if (transitionTexts == null || transitionTexts.Length == 0)
             {
-                transitionTexts = new[] { "" }; // 或者给个默认标题，比如 "Day 1"
+                transitionTexts = new[] { "继续..." }; // 默认转场文字
             }
 
             _coroutineRunner.StartCoroutine(FadeToStageCoroutine(stageId, fadeDuration, transitionTexts));
@@ -332,6 +332,10 @@ namespace SpookyGame.Core
         private static IEnumerator FadeToStageCoroutine(string stageId, float fadeDuration, string[] transitionTexts)
         {
             Debug.Log($"[SceneService] Fading to stage (text-first): {stageId}, texts: {transitionTexts.Length}");
+            for (int i = 0; i < transitionTexts.Length; i++)
+            {
+                Debug.Log($"[SceneService] Transition text {i}: '{transitionTexts[i]}'");
+            }
 
             // 1) 先淡入到黑屏（保持老场景，不暴露新场景）
             EventBus.Publish(new FadeStartedEvent(true, fadeDuration));

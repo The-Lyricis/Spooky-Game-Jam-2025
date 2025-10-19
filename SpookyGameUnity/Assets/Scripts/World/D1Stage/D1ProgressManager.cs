@@ -45,9 +45,6 @@ namespace SpookyGame.D1Scene
         [Tooltip("对话结束后切换的关卡")]
         [SerializeField] private string nextStageId = "D2";
         
-        [Tooltip("场景切换提示文字")]
-        [SerializeField] private string stageChangeStr = "Day 2";
-        
         private bool _hasShaved = false;
         private bool _openingDialogueShown = false;
         
