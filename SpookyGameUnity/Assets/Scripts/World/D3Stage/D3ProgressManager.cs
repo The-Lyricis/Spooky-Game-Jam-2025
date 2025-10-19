@@ -32,15 +32,14 @@ namespace SpookyGame.D3Scene
         [TextArea(2, 5)]
         [SerializeField] private string[] openingDialogueLines = new string[]
         {
-            "需要剪指甲。"
+            
         };
         
         [Tooltip("最终对话")]
         [TextArea(2, 5)]
         [SerializeField] private string[] finalDialogueLines = new string[]
         {
-            "指甲剪好了。",
-            "可以继续了。"
+            
         };
         
         [Header("Scene Transition")]

@@ -960,8 +960,8 @@ MonoBehaviour:
   openingDialogueLines:
   - Nail...
   finalDialogueLines:
-  - "\u6307\u7532\u526A\u597D\u4E86\u3002"
-  - "\u53EF\u4EE5\u7EE7\u7EED\u4E86\u3002"
+  - 
+  - 
   nextStageId: D4
   fadeDuration: 1
   transitionTexts:
@@ -2008,7 +2008,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 532239418331041053, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 675611847355877460, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
       propertyPath: closeupUI
@@ -2153,7 +2153,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6138922631633173318, guid: ce88df90e50e64344a37e9f1b2f46878, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

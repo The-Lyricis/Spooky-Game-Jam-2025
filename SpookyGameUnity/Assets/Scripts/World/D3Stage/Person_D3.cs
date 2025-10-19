@@ -32,7 +32,7 @@ namespace SpookyGame.D3Scene
         [TextArea(2, 5)]
         [SerializeField] private string[] noScissorsDialogueLines = new string[]
         {
-            "需要剪刀才能剪指甲。"
+            "I need scissors to cut my nails."
         };
         
         private bool _hasBeenCut = false;
