@@ -1699,6 +1699,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 675611847355877460, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
+      propertyPath: closeupUI
+      value: 
+      objectReference: {fileID: 1261952351}
     - target: {fileID: 747077456188206660, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
       propertyPath: randomStartPosition
       value: 1
