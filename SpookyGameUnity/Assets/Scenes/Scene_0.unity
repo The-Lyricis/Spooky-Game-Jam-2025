@@ -1043,10 +1043,9 @@ MonoBehaviour:
   openingDialogueDelay: 2
   openingDialogueLines:
   - Nail...
-  finalDialogueLines:
-  - "\u6307\u7532\u526A\u597D\u4E86\u3002"
-  - "\u53EF\u4EE5\u7EE7\u7EED\u4E86\u3002"
+  finalDialogueLines: []
   nextStageId: D4
+  stageChangeStr: Day 4
   fadeDuration: 1
   transitionTexts:
   - Day 4
@@ -1161,8 +1160,9 @@ MonoBehaviour:
   BirdIcon: {fileID: 21300000, guid: fc715af499648b34e9905e23d781da02, type: 3}
   BirdSkullIcon: {fileID: 21300000, guid: 31b68b633b6161e4e8f2863b401eef6e, type: 3}
   TeethIcon: {fileID: 21300000, guid: ffa6c700c110be84cbc6d78e7cbcf5e5, type: 3}
-  HairsIcon: {fileID: 0}
+  HairsIcon: {fileID: 21300000, guid: e991780339f39584e9f51d28b8be88ec, type: 3}
   ScissorIcon: {fileID: 21300000, guid: d519aaa137ea7154d842e5eaf7ce6de8, type: 3}
+  chuchou: {fileID: 21300000, guid: e991780339f39584e9f51d28b8be88ec, type: 3}
   hideWhenEmpty: 1
 --- !u!1 &1191206757
 GameObject:
@@ -2077,6 +2077,8 @@ MonoBehaviour:
   objectC: {fileID: 1341806938}
   dialogueSystem: {fileID: 1191206759}
   autoFindDialogueSystem: 1
+  openingDialogueLines:
+  - Myself, I do not recognise.
   dialogueLines:
   - You, I am.
   nextStageId: D1

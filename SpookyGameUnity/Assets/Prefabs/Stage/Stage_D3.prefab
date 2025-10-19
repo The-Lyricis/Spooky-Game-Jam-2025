@@ -5832,7 +5832,7 @@ MonoBehaviour:
   dialogueSystem: {fileID: 0}
   autoFindDialogueSystem: 1
   noScissorsDialogueLines:
-  - "\u9700\u8981\u526A\u5200\u624D\u80FD\u526A\u6307\u7532\u3002"
+  - Need Scissors
 --- !u!1 &6678492325209913052
 GameObject:
   m_ObjectHideFlags: 0
@@ -5888,6 +5888,7 @@ MonoBehaviour:
   - "\u6307\u7532\u526A\u597D\u4E86\u3002"
   - "\u53EF\u4EE5\u7EE7\u7EED\u4E86\u3002"
   nextStageId: D4
+  stageChangeStr: Day 4
   fadeDuration: 1
   transitionTexts:
   - Day 4

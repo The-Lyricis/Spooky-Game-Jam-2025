@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d19e663d3bbccd499e51125d51f7629, type: 3}
   m_Name: WhosLilaRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   settings:
     effectMaterial: {fileID: 2100000, guid: 214e73f340061984da6443ba43fa64af, type: 2}
     renderPassEvent: 550
