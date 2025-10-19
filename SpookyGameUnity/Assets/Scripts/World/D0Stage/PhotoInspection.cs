@@ -25,6 +25,8 @@ namespace SpookyGame.D0Scene
         {
             "Faces...I see."
         };
+        [SerializeField] private AudioClip inspectSfx;
+        [SerializeField] private AudioSource audioSource;
         
         protected override void Awake()
         {
@@ -39,7 +41,11 @@ namespace SpookyGame.D0Scene
         protected override void OnInteract(GameObject actor)
         {
             base.OnInteract(actor);
-            
+
+            if (audioSource != null && inspectSfx != null)
+            {
+                audioSource.PlayOneShot(inspectSfx);
+            }
             if (dialogueSystem != null && dialogueLines != null && dialogueLines.Length > 0)
             {
                 StartCoroutine(StartDialogueAfterFrame());

@@ -210,7 +210,7 @@ public class FallingTeeth : Interactable
     private void TransitionToNextStage()
     {
         Debug.Log($"[FallingTeeth] 切换到场景: {targetStageId}");
-        SceneService.FadeToStage(targetStageId, "", 1f, "");
+        SceneService.FadeToStage(targetStageId, "", 1f, "123");
     }
     
     /// <summary>

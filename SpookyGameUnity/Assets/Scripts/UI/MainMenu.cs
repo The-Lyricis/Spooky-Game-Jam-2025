@@ -17,6 +17,10 @@ namespace SpookyGame.UI
         
         [Header("Game Configuration")]
         [SerializeField] private GameConfig gameConfig;
+
+        [Header("Audio Settings")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip ButtonClickSfx;
         
         private void Start()
         {
@@ -41,6 +45,10 @@ namespace SpookyGame.UI
             if (quitButton != null)
             {
                 quitButton.onClick.AddListener(OnQuitClicked);
+            }
+             if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
             }
         }
         
@@ -80,6 +88,11 @@ namespace SpookyGame.UI
             }
             
             Debug.Log("[MainMenu] Starting new game");
+
+            if (audioSource != null && ButtonClickSfx != null)
+            {
+                audioSource.PlayOneShot(ButtonClickSfx);
+            }
             
             // 清除旧的游戏状态
             FlagService.ClearAllFlags();
@@ -139,6 +152,10 @@ namespace SpookyGame.UI
         /// </summary>
         private void OnQuitClicked()
         {
+            if (audioSource != null && ButtonClickSfx != null)
+            {
+                audioSource.PlayOneShot(ButtonClickSfx);
+            }
             Debug.Log("[MainMenu] Quitting game");
             
             #if UNITY_EDITOR

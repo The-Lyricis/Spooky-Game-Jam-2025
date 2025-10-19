@@ -70,7 +70,8 @@ namespace SpookyGame.World
             }
             
             // 隐藏鸟
-            gameObject.SetActive(false);
+            gameObject.GetComponent<SpriteRenderer>().enabled = false;
+            //gameObject.SetActive(false);
         }
     }
 }

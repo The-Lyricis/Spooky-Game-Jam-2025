@@ -21,6 +21,7 @@ namespace SpookyGame.World
         
         private SpriteRenderer _spriteRenderer;
         private int _currentSpriteIndex = 0;
+        [SerializeField] private GameObject BiggerFlower;
         
         protected override void Awake()
         {
@@ -91,7 +92,8 @@ namespace SpookyGame.World
         /// </summary>
         private void ChangeSprite()
         {
-            _spriteRenderer.sprite = flowerSprite;
+            BiggerFlower.SetActive(true);
+            _spriteRenderer.enabled = false;
 
         }
     

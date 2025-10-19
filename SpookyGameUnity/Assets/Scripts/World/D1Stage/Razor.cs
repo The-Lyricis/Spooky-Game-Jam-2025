@@ -70,7 +70,8 @@ namespace SpookyGame.World
             }
             
             // 隐藏剃刀
-            gameObject.SetActive(false);
+            gameObject.GetComponent<SpriteRenderer>().enabled = false;
+            //gameObject.SetActive(false);
         }
     }
 }
