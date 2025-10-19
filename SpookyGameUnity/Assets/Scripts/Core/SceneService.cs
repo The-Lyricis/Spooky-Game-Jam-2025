@@ -148,6 +148,9 @@ namespace SpookyGame.Core
                 _currentSceneName = sceneName;
                 Debug.Log($"[SceneService] Scene loaded: {sceneName}");
                 
+                // 重新发现新场景中的 Stage 节点
+                DiscoverStages();
+                
                 // 发布场景加载完成事件
                 EventBus.Publish(new SceneLoadCompletedEvent(sceneName));
                 
@@ -198,6 +201,9 @@ namespace SpookyGame.Core
             
             _currentSceneName = sceneName;
             Debug.Log($"[SceneService] Scene activated: {sceneName}");
+            
+            // 重新发现新场景中的 Stage 节点
+            DiscoverStages();
             
             // 发布场景加载完成事件
             EventBus.Publish(new SceneLoadCompletedEvent(sceneName));
