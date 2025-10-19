@@ -69,6 +69,10 @@ public class EyeGenerate : MonoBehaviour
     [SerializeField] private AudioClip generateSound;
     [Tooltip("音频源")]
     [SerializeField] private AudioSource audioSource;
+
+    [SerializeField] private GameObject bigbigMonster;
+    [SerializeField] private GameObject zhezhao;
+    [SerializeField] private GameObject yanjing;
     
     // 私有变量
     private List<GameObject> _generatedEyes = new List<GameObject>();
@@ -95,7 +99,21 @@ public class EyeGenerate : MonoBehaviour
         if (autoStart)
         {
             StartGeneration();
+            StartCoroutine(EndTimeWait());
         }
+    }
+    IEnumerator EndTimeWait()
+    {
+        yield return new WaitForSeconds(5f);
+        StopGeneration();
+        yield return new WaitForSeconds(5f);
+        bigbigMonster.SetActive(false);
+        zhezhao.SetActive(false);
+        
+        yield return new WaitForSeconds(1f);
+        //
+        //
+
     }
     
     /// <summary>

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using SpookyGame.Core;
+using SpookyGame.UI;
 using SpookyGame.World;
 using UnityEngine;
 
@@ -55,11 +56,15 @@ public class FinalChange : Interactable
         }
         else
         {
-            
+            string[] dialogueLines = { "Eyes, I shall not have." };
+            // 假设有一个 DialogueSystem 类型的组件已被分配，可以通过 GetComponent 或拖拽到 Inspector
+            DialogueSystem dialogueSystem = FindObjectOfType<DialogueSystem>();
+            if (dialogueSystem != null)
+            {
+                dialogueSystem.StartDialogue(dialogueLines, null);
+            }
         }
     }
-    
-    /// <summary>
     /// 切换图片
     /// </summary>
     private void ChangeSprite()
