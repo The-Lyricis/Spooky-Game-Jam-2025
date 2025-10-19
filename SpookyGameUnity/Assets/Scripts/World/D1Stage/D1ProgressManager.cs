@@ -126,6 +126,7 @@ namespace SpookyGame.D1Scene
             {
                 OnEndingDialogueComplete();
             }
+            FlagService.ClearHeldItem();
         }
 
         [SerializeField] private  // 使用多个过渡文字

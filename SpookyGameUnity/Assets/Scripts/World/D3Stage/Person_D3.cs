@@ -54,11 +54,11 @@ namespace SpookyGame.D3Scene
                 string held = FlagService.GetHeldItem();
                 if (held == "scissors")
                 {
-                    return "剪指甲";
+                    return "";
                 }
                 else
                 {
-                    return "需要剪刀";
+                    return "";
                 }
             }
         }
