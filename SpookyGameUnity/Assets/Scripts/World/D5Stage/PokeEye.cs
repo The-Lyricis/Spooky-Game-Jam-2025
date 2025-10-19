@@ -237,8 +237,8 @@ public class PokeEye : MonoBehaviour
     /// </summary>
     private void SwitchToNextScene()
     {
-        Debug.Log($"[PokeEye] 切换到场景: {targetSceneId}");
-        SceneService.FadeToStage(targetSceneId, "", 1f, "");
+        // Debug.Log($"[PokeEye] 切换到场景: {targetSceneId}");
+        // SceneService.FadeToStage(targetSceneId, 1f, null);
     }
     
     /// <summary>
