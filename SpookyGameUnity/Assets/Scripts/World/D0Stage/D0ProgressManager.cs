@@ -8,7 +8,7 @@ namespace SpookyGame.D0Scene
     /// D0 场景进度管理器
     /// 追踪照片和窗户的检视状态，切换物体显示，触发对话
     /// </summary>
-    public class D0ProgressManager : MonoBehaviour
+    public class D0ProgressManager : MonoBehaviour, IEventHandler<TransitionFadeOutCompleteEvent>
     {
         [Header("Progress Objects")]
         [Tooltip("物体 A（0 个检视）")]
@@ -27,7 +27,14 @@ namespace SpookyGame.D0Scene
         [Tooltip("自动查找对话系统")]
         [SerializeField] private bool autoFindDialogueSystem = true;
         
-        [Tooltip("对话内容")]
+        [Tooltip("开场对话")]
+        [TextArea(2, 5)]
+        [SerializeField] private string[] openingDialogueLines = new string[]
+        {
+            "Myself, I do not recognise."
+        };
+        
+        [Tooltip("最终对话内容")]
         [TextArea(2, 5)]
         [SerializeField] private string[] dialogueLines = new string[]
         {
@@ -49,6 +56,7 @@ namespace SpookyGame.D0Scene
         
         private int _lastInspectionCount = 0;
         private bool _dialogueTriggered = false;
+        private bool _openingDialogueShown = false;
         
         private void Start()
         {
@@ -57,7 +65,29 @@ namespace SpookyGame.D0Scene
                 dialogueSystem = FindObjectOfType<DialogueSystem>();
             }
             
+            // 订阅转场淡出完成事件，等待黑幕淡出结束
+            EventBus.Subscribe<TransitionFadeOutCompleteEvent>(this);
+            
             UpdateObjects();
+        }
+        
+        private void OnDestroy()
+        {
+            // 取消订阅
+            EventBus.Unsubscribe<TransitionFadeOutCompleteEvent>(this);
+        }
+        
+        /// <summary>
+        /// 处理转场淡出完成事件
+        /// </summary>
+        public void Handle(TransitionFadeOutCompleteEvent eventData)
+        {
+            // 当转场淡出完成且当前在 D0 场景时，显示开场对话
+            if (eventData.StageId == "D0" && !_openingDialogueShown)
+            {
+                _openingDialogueShown = true;
+                ShowOpeningDialogue();
+            }
         }
         
         private void Update()
@@ -122,6 +152,17 @@ namespace SpookyGame.D0Scene
                 case 2:
                     if (objectC != null) objectC.SetActive(true);
                     break;
+            }
+        }
+        
+        /// <summary>
+        /// 显示开场对话
+        /// </summary>
+        private void ShowOpeningDialogue()
+        {
+            if (dialogueSystem != null && openingDialogueLines != null && openingDialogueLines.Length > 0)
+            {
+                dialogueSystem.StartDialogue(openingDialogueLines, null);
             }
         }
         

@@ -32,19 +32,23 @@ namespace SpookyGame.D3Scene
         [TextArea(2, 5)]
         [SerializeField] private string[] openingDialogueLines = new string[]
         {
-            
+            "需要剪指甲。"
         };
         
         [Tooltip("最终对话")]
         [TextArea(2, 5)]
         [SerializeField] private string[] finalDialogueLines = new string[]
         {
-            
+            "指甲剪好了。",
+            "可以继续了。"
         };
         
         [Header("Scene Transition")]
         [Tooltip("对话结束后切换的关卡")]
         [SerializeField] private string nextStageId = "D4";
+        
+        [Tooltip("场景切换提示文字")]
+        [SerializeField] private string stageChangeStr = "Day 4";
         
         [Tooltip("黑幕淡入淡出时长（秒）")]
         [SerializeField] private float fadeDuration = 1f;

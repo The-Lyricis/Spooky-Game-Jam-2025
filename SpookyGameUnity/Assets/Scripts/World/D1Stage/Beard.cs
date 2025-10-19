@@ -37,9 +37,6 @@ namespace SpookyGame.World
         [Tooltip("完成后设置的 flag")]
         [SerializeField] private string completionFlag = "d1.beard_shaved";
         
-        [Header("Fade Out Settings")]
-        [Tooltip("刮胡子后淡出时长")]
-        [SerializeField] private float fadeOutDuration = 1f;
         
         private bool _hasInteracted = false;
         
@@ -69,82 +66,8 @@ namespace SpookyGame.World
             {
                 dialogueSystem = FindObjectOfType<DialogueSystem>();
             }
-            
-            // 淡入效果
-            StartCoroutine(FadeInCoroutine());
         }
         
-        /// <summary>
-        /// 淡入协程
-        /// </summary>
-        private System.Collections.IEnumerator FadeInCoroutine()
-        {
-            // 获取 SpriteRenderer 组件
-            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-            if (spriteRenderer == null) yield break;
-            
-            // 设置初始透明度为 0
-            Color startColor = spriteRenderer.color;
-            startColor.a = 0f;
-            spriteRenderer.color = startColor;
-            
-            // 淡入到完全不透明
-            float duration = 1f; // 淡入时长
-            float elapsed = 0f;
-            
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-                
-                Color currentColor = spriteRenderer.color;
-                currentColor.a = Mathf.Lerp(0f, 1f, t);
-                spriteRenderer.color = currentColor;
-                
-                yield return null;
-            }
-            
-            // 确保最终完全不透明
-            Color finalColor = spriteRenderer.color;
-            finalColor.a = 1f;
-            spriteRenderer.color = finalColor;
-        }
-        
-        /// <summary>
-        /// 淡出协程
-        /// </summary>
-        private System.Collections.IEnumerator FadeOutCoroutine()
-        {
-            // 获取 SpriteRenderer 组件
-            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-            if (spriteRenderer == null) yield break;
-            
-            // 从当前透明度淡出到完全透明
-            Color startColor = spriteRenderer.color;
-            float startAlpha = startColor.a;
-            
-            float elapsed = 0f;
-            
-            while (elapsed < fadeOutDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / fadeOutDuration);
-                
-                Color currentColor = spriteRenderer.color;
-                currentColor.a = Mathf.Lerp(startAlpha, 0f, t);
-                spriteRenderer.color = currentColor;
-                
-                yield return null;
-            }
-            
-            // 确保最终完全透明
-            Color finalColor = spriteRenderer.color;
-            finalColor.a = 0f;
-            spriteRenderer.color = finalColor;
-            
-            // 隐藏游戏对象
-            gameObject.SetActive(false);
-        }
         
         /// <summary>
         /// 检查是否可以交互
@@ -188,8 +111,8 @@ namespace SpookyGame.World
                 // 设置 flag，由 D1ProgressManager 处理后续对话和场景切换
                 FlagService.SetFlag(completionFlag, true);
                 
-                // 开始淡出效果
-                StartCoroutine(FadeOutCoroutine());
+                // 直接隐藏游戏对象，不使用淡出效果
+                gameObject.SetActive(false);
             }
             else
             {

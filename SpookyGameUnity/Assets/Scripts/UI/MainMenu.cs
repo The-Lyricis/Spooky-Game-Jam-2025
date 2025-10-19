@@ -97,11 +97,19 @@ namespace SpookyGame.UI
             // 清除旧的游戏状态
             FlagService.ClearAllFlags();
             
+            // 开始游戏转场文字
+            string[] startGameTexts = new string[]
+            {
+                "To remember what forgets.",
+                "To carve the seen.",
+                "To mirror through flesh.",
+            };
+            
             // 加载游戏场景
             SceneService.LoadScene(gameConfig.gameSceneName, () =>
             {
-                // 场景加载完成后，直接启动第一关
-                SceneService.ActivateStage(gameConfig.firstStageId);
+                // 场景加载完成后，使用开始游戏转场
+                SceneService.StartGameTransition(gameConfig.firstStageId, startGameTexts, 1f);
                 
                 // 切换到探索状态
                 EventBus.Publish(new GameStateChangedEvent(GameState.Exploring));

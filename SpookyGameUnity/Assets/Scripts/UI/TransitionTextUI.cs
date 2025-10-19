@@ -9,7 +9,7 @@ namespace SpookyGame.UI
     /// 场景切换过渡文字 UI
     /// 显示打字机效果的过渡文字，等待玩家点击后继续
     /// </summary>
-    public class TransitionTextUI : MonoBehaviour, IEventHandler<TransitionTextEvent>
+    public class TransitionTextUI : MonoBehaviour, IEventHandler<TransitionTextEvent>, IEventHandler<FadeStartedEvent>
     {
         [Header("UI References")]
         [SerializeField] private GameObject transitionPanel;
@@ -58,15 +58,17 @@ namespace SpookyGame.UI
         
         private void Start()
         {
-            // 订阅过渡文字事件
-            Debug.Log("[TransitionTextUI] Subscribing to TransitionTextEvent");
+            // 订阅过渡文字事件和淡入淡出事件
+            Debug.Log("[TransitionTextUI] Subscribing to TransitionTextEvent and FadeStartedEvent");
             EventBus.Subscribe<TransitionTextEvent>(this);
+            EventBus.Subscribe<FadeStartedEvent>(this);
         }
         
         private void OnDestroy()
         {
             // 取消订阅
             EventBus.Unsubscribe<TransitionTextEvent>(this);
+            EventBus.Unsubscribe<FadeStartedEvent>(this);
         }
         
         private void Update()
@@ -124,6 +126,25 @@ namespace SpookyGame.UI
             else
             {
                 HideTransitionText();
+            }
+        }
+        
+        /// <summary>
+        /// 处理淡入淡出事件
+        /// </summary>
+        public void Handle(FadeStartedEvent eventData)
+        {
+            Debug.Log($"[TransitionTextUI] Received FadeStartedEvent: FadeIn={eventData.FadeIn}, Duration={eventData.Duration}");
+            
+            if (eventData.FadeIn)
+            {
+                // 淡入黑幕
+                StartCoroutine(HandleFadeIn(eventData.Duration));
+            }
+            else
+            {
+                // 淡出黑幕
+                StartCoroutine(HandleFadeOut(eventData.Duration));
             }
         }
         
@@ -200,8 +221,20 @@ namespace SpookyGame.UI
         /// </summary>
         private IEnumerator ShowSequence(string text)
         {
-            // 淡入
-            yield return StartCoroutine(FadeIn());
+            // 检查是否是开始游戏转场（黑幕已经存在，不需要淡入）
+            bool isStartGameTransition = _canvasGroup.alpha >= 0.9f; // 如果黑幕已经显示，说明是开始游戏转场
+            
+            if (!isStartGameTransition)
+            {
+                // 普通转场：淡入黑幕
+                yield return StartCoroutine(FadeIn());
+            }
+            else
+            {
+                // 开始游戏转场：立即显示黑幕（0秒淡入）
+                Debug.Log("[TransitionTextUI] Start game transition detected, using instant fade in");
+                yield return StartCoroutine(FadeIn(0f));
+            }
             
             // 直接设置完整文字（不使用打字机效果）
             if (transitionText != null)
@@ -408,18 +441,101 @@ namespace SpookyGame.UI
         }
         
         /// <summary>
+        /// 处理淡入事件
+        /// </summary>
+        private IEnumerator HandleFadeIn(float duration)
+        {
+            Debug.Log($"[TransitionTextUI] Handling fade in with duration: {duration}");
+            
+            // 显示面板
+            transitionPanel.SetActive(true);
+            _isVisible = true;
+            
+            // 设置交互状态
+            _canvasGroup.interactable = true;
+            _canvasGroup.blocksRaycasts = true;
+            
+            // 如果时间为0，立即显示
+            if (duration <= 0f)
+            {
+                _canvasGroup.alpha = 1f;
+                Debug.Log("[TransitionTextUI] Instant fade in - alpha set to 1");
+                yield break;
+            }
+            
+            // 淡入动画
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                _canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
+                yield return null;
+            }
+            
+            _canvasGroup.alpha = 1f;
+            Debug.Log("[TransitionTextUI] Fade in completed");
+        }
+        
+        /// <summary>
+        /// 处理淡出事件
+        /// </summary>
+        private IEnumerator HandleFadeOut(float duration)
+        {
+            Debug.Log($"[TransitionTextUI] Handling fade out with duration: {duration}");
+            
+            // 如果时间为0，立即隐藏
+            if (duration <= 0f)
+            {
+                _canvasGroup.alpha = 0f;
+                _canvasGroup.interactable = false;
+                _canvasGroup.blocksRaycasts = false;
+                transitionPanel.SetActive(false);
+                _isVisible = false;
+                Debug.Log("[TransitionTextUI] Instant fade out - alpha set to 0");
+                yield break;
+            }
+            
+            // 淡出动画
+            float elapsed = 0f;
+            float startAlpha = _canvasGroup.alpha;
+            
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                _canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsed / duration);
+                yield return null;
+            }
+            
+            _canvasGroup.alpha = 0f;
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
+            transitionPanel.SetActive(false);
+            _isVisible = false;
+            Debug.Log("[TransitionTextUI] Fade out completed");
+        }
+
+        /// <summary>
         /// 淡入动画
         /// </summary>
-        private IEnumerator FadeIn()
+        private IEnumerator FadeIn(float duration = -1f)
         {
             _canvasGroup.interactable = true;
             _canvasGroup.blocksRaycasts = true;
             
+            float fadeDuration = duration < 0 ? fadeInDuration : duration;
+            
+            // 如果时间为0，立即显示
+            if (fadeDuration <= 0f)
+            {
+                _canvasGroup.alpha = 1f;
+                yield break;
+            }
+            
             float elapsed = 0f;
-            while (elapsed < fadeInDuration)
+            while (elapsed < fadeDuration)
             {
                 elapsed += Time.deltaTime;
-                _canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / fadeInDuration);
+                _canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / fadeDuration);
                 yield return null;
             }
             

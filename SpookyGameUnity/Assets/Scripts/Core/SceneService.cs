@@ -151,6 +151,12 @@ namespace SpookyGame.Core
                 // 重新发现新场景中的 Stage 节点
                 DiscoverStages();
                 
+                // 立即隐藏所有Stage，防止看到蓝色背景
+                HideAllStages();
+                
+                // 立即显示黑幕，覆盖Unity的蓝色背景
+                EventBus.Publish(new FadeStartedEvent(true, 0f));
+                
                 // 发布场景加载完成事件
                 EventBus.Publish(new SceneLoadCompletedEvent(sceneName));
                 
@@ -297,6 +303,36 @@ namespace SpookyGame.Core
         }
         
         /// <summary>
+        /// 开始游戏转场：直接黑幕，显示多段文字，逐行点击推进，最后淡出到Stage
+        /// </summary>
+        /// <param name="stageId">目标关卡 ID</param>
+        /// <param name="transitionTexts">过渡文字数组</param>
+        /// <param name="fadeOutDuration">淡出时长</param>
+        public static void StartGameTransition(string stageId, string[] transitionTexts, float fadeOutDuration = 1f)
+        {
+            if (!_isInitialized)
+            {
+                Debug.LogError("[SceneService] Not initialized. Call Initialize() first.");
+                return;
+            }
+
+            if (_coroutineRunner == null)
+            {
+                Debug.LogWarning("[SceneService] No coroutine runner, falling back to direct activation");
+                ActivateStage(stageId);
+                return;
+            }
+
+            // 强制要求有文字
+            if (transitionTexts == null || transitionTexts.Length == 0)
+            {
+                transitionTexts = new[] { "开始游戏..." };
+            }
+
+            _coroutineRunner.StartCoroutine(StartGameTransitionCoroutine(stageId, transitionTexts, fadeOutDuration));
+        }
+
+        /// <summary>
         /// 使用过渡文字转场切换关卡
         /// </summary>
         /// <param name="stageId">关卡 ID</param>
@@ -327,6 +363,40 @@ namespace SpookyGame.Core
         }
         
         /// <summary>
+        /// 开始游戏转场协程：直接黑幕，逐行显示文字，最后淡出到Stage
+        /// </summary>
+        private static IEnumerator StartGameTransitionCoroutine(string stageId, string[] transitionTexts, float fadeOutDuration)
+        {
+            Debug.Log($"[SceneService] Starting game transition to stage: {stageId}, texts: {transitionTexts.Length}");
+            for (int i = 0; i < transitionTexts.Length; i++)
+            {
+                Debug.Log($"[SceneService] Start game text {i}: '{transitionTexts[i]}'");
+            }
+
+            // 1) 确保所有Stage都是隐藏的（黑幕已经在场景加载时显示）
+            HideAllStages();
+            
+            // 2) 等待一帧确保黑幕显示
+            yield return null;
+            
+            // 3) 显示过渡文字，等待玩家逐行点击
+            bool transitionComplete = false;
+            EventBus.Publish(new TransitionTextEvent(transitionTexts, true, () => { 
+                // 在玩家点击完成所有文字后，激活目标Stage
+                ActivateStage(stageId);
+                Debug.Log($"[SceneService] Stage activated: {stageId} after start game transition");
+                transitionComplete = true; 
+            }));
+            yield return new WaitUntil(() => transitionComplete);
+
+            // 4) 淡出黑幕到目标Stage
+            EventBus.Publish(new FadeStartedEvent(false, fadeOutDuration));
+            yield return new WaitForSeconds(fadeOutDuration);
+            
+            Debug.Log($"[SceneService] Start game transition to {stageId} completed");
+        }
+
+        /// <summary>
         /// 黑幕转场协程（支持多个过渡文字）
         /// </summary>
         private static IEnumerator FadeToStageCoroutine(string stageId, float fadeDuration, string[] transitionTexts)
@@ -355,6 +425,21 @@ namespace SpookyGame.Core
             Debug.Log($"[SceneService] Fade transition to {stageId} completed");
         }
         
+        /// <summary>
+        /// 隐藏所有Stage
+        /// </summary>
+        private static void HideAllStages()
+        {
+            foreach (var stage in _stages.Values)
+            {
+                if (stage.stageRoot != null)
+                {
+                    stage.stageRoot.SetActive(false);
+                }
+            }
+            Debug.Log("[SceneService] All stages hidden");
+        }
+
         /// <summary>
         /// 清空关卡状态（切换关卡时调用）
         /// </summary>
