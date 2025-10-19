@@ -47,3 +47,6 @@ TagManager:
   - name: Object
     uniqueID: 3433079693
     locked: 0
+  - name: Eyes
+    uniqueID: 3405050235
+    locked: 0
