@@ -30,6 +30,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6946596494275202776}
+  - {fileID: 4661113731619663305}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1016877422222776949
@@ -411,6 +412,59 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &3863610890689214186
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4661113731619663305}
+  - component: {fileID: 854317759863693191}
+  m_Layer: 0
+  m_Name: D1ProgressManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4661113731619663305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3863610890689214186}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.7126783, y: -2.6251354, z: 5.796762}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1816477860806951337}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &854317759863693191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3863610890689214186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42ba261dd99f9084ebf325974d504e25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectA: {fileID: 7688928214612967235}
+  dialogueSystem: {fileID: 0}
+  autoFindDialogueSystem: 1
+  openingDialogueLines:
+  - Mess, I shall clean.
+  endingDialogueLines:
+  - "\u522E\u4E86\u80E1\u5B50\uFF0C\u611F\u89C9\u6E05\u723D\u591A\u4E86\u3002"
+  nextStageId: D2
+  stageChangeStr: Day 2
 --- !u!1 &3979081010887392503
 GameObject:
   m_ObjectHideFlags: 0
@@ -3212,7 +3266,7 @@ MonoBehaviour:
   shaveSfx: {fileID: 0}
   animator: {fileID: 0}
   animTrigger: Shave
-  targetStageId: D2
+  completionFlag: d1.beard_shaved
 --- !u!1 &6140213834106669457
 GameObject:
   m_ObjectHideFlags: 0

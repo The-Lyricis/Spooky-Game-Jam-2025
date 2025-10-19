@@ -8,49 +8,75 @@ namespace SpookyGame.D0Scene
 {
     /// <summary>
     /// D0 场景 - 照片检视
-    /// 继承自 InspectableObject，点击后显示照片特写并设置检视旗标
+    /// 点击后显示照片特写，同时显示对话，对话完成后可点击退出特写
     /// </summary>
     public class PhotoInspection : InspectableObject
     {
-        private CloseupViewUI _closeupUI;
+        [Header("Dialogue Settings")]
+        [Tooltip("对话系统引用")]
+        [SerializeField] private DialogueSystem dialogueSystem;
+        
+        [Tooltip("自动查找对话系统")]
+        [SerializeField] private bool autoFindDialogueSystem = true;
+        
+        [Tooltip("检视时的对话内容")]
+        [TextArea(2, 5)]
+        [SerializeField] private string[] dialogueLines = new string[]
+        {
+            "Faces...I see."
+        };
         
         protected override void Awake()
         {
             base.Awake();
             
-            // 查找 CloseupViewUI
-            _closeupUI = FindObjectOfType<CloseupViewUI>();
-            if (_closeupUI == null)
+            if (autoFindDialogueSystem && dialogueSystem == null)
             {
-                Debug.LogError("[PhotoInspection] CloseupViewUI not found in scene!");
+                dialogueSystem = FindObjectOfType<DialogueSystem>();
             }
         }
         
         protected override void OnInteract(GameObject actor)
         {
-            // 调用父类显示特写
             base.OnInteract(actor);
             
-            Debug.Log("[PhotoInspection] Showing photo closeup...");
+            if (dialogueSystem != null && dialogueLines != null && dialogueLines.Length > 0)
+            {
+                StartCoroutine(StartDialogueAfterFrame());
+            }
             
-            // 等待特写关闭后再设置旗标
             StartCoroutine(WaitForCloseupClose());
         }
         
-        private IEnumerator WaitForCloseupClose()
+        private IEnumerator StartDialogueAfterFrame()
         {
-            // 等待一帧，确保特写已经显示
-            yield return null;
-            
-            // 等待特写关闭
-            while (_closeupUI != null && _closeupUI.IsVisible)
+            // 等待鼠标释放，避免点击照片的操作被对话系统检测到
+            while (UnityEngine.Input.GetMouseButton(0))
             {
                 yield return null;
             }
             
-            // 特写关闭后设置旗标
+            // 再等待一帧确保状态稳定
+            yield return null;
+            
+            dialogueSystem.StartDialogue(dialogueLines, OnDialogueComplete);
+        }
+        
+        private IEnumerator WaitForCloseupClose()
+        {
+            yield return null;
+            
+            while (closeupUI != null && closeupUI.IsVisible)
+            {
+                yield return null;
+            }
+            
             FlagService.SetFlag("inspected.photo", true);
-            Debug.Log("[PhotoInspection] Closeup closed. Set flag: inspected.photo = true");
+        }
+        
+        private void OnDialogueComplete()
+        {
+            // 对话完成后不做任何事，等待用户点击照片外退出特写
         }
     }
 }

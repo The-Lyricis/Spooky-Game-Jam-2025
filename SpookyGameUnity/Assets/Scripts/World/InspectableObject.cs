@@ -14,7 +14,7 @@ namespace SpookyGame.World
         [SerializeField] private bool useObjectSprite = false;
         
         [Header("UI Reference")]
-        [SerializeField] private CloseupViewUI closeupUI;
+        [SerializeField] protected CloseupViewUI closeupUI;
         [SerializeField] private bool autoFindUI = true;
         
         [Header("Debug")]
