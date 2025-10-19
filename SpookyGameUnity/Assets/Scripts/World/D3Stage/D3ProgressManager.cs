@@ -9,7 +9,7 @@ namespace SpookyGame.D3Scene
     /// D3 场景管理器
     /// 管理复杂的物品合成和激活流程
     /// </summary>
-    public class D3ProgressManager : MonoBehaviour
+    public class D3ProgressManager : MonoBehaviour, IEventHandler<TransitionFadeOutCompleteEvent>
     {
         [Header("Scene Objects")]
         [Tooltip("剪刀物体（初始隐藏）")]
@@ -69,8 +69,27 @@ namespace SpookyGame.D3Scene
             if (scissors != null) scissors.SetActive(false);
             if (nail != null) nail.SetActive(false);
             
-            // 延迟显示开场对话
-            StartCoroutine(WaitAndShowOpeningDialogue());
+            // 订阅转场淡出完成事件，等待黑幕淡出结束
+            EventBus.Subscribe<TransitionFadeOutCompleteEvent>(this);
+        }
+        
+        private void OnDestroy()
+        {
+            // 取消订阅
+            EventBus.Unsubscribe<TransitionFadeOutCompleteEvent>(this);
+        }
+        
+        /// <summary>
+        /// 处理转场淡出完成事件
+        /// </summary>
+        public void Handle(TransitionFadeOutCompleteEvent eventData)
+        {
+            // 当转场淡出完成且当前在 D3 场景时，显示开场对话
+            if (eventData.StageId == "D3" && !_openingDialogueShown)
+            {
+                _openingDialogueShown = true;
+                ShowOpeningDialogue();
+            }
         }
         
         private void Update()
@@ -99,16 +118,6 @@ namespace SpookyGame.D3Scene
             }
         }
         
-        private IEnumerator WaitAndShowOpeningDialogue()
-        {
-            yield return new WaitForSeconds(openingDialogueDelay);
-            
-            if (!_openingDialogueShown)
-            {
-                _openingDialogueShown = true;
-                ShowOpeningDialogue();
-            }
-        }
         
         private void ShowOpeningDialogue()
         {
@@ -144,18 +153,25 @@ namespace SpookyGame.D3Scene
         {
             if (dialogueSystem != null && finalDialogueLines != null && finalDialogueLines.Length > 0)
             {
-                dialogueSystem.StartDialogue(finalDialogueLines, OnFinalDialogueComplete);
+                dialogueSystem.StartDialogue(finalDialogueLines, OnEndingDialogueComplete);
             }
             else
             {
-                OnFinalDialogueComplete();
+                OnEndingDialogueComplete();
             }
         }
+        [SerializeField] private  // 使用多个过渡文字
+            string[] transitionTexts = new string[]
+            {
+                "Day 4"
+            };
         
-        private void OnFinalDialogueComplete()
+        /// <summary>
+        /// 结束对话完成后切换场景
+        /// </summary>
+        private void OnEndingDialogueComplete()
         {
-            // 对话完成后，黑幕转场到下一关
-            SceneService.FadeToStage(nextStageId, stageChangeStr, fadeDuration, stageChangeStr);
+            SceneService.FadeToStage(nextStageId, 1f, transitionTexts);
         }
     }
 }

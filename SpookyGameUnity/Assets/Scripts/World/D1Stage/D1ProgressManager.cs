@@ -9,7 +9,7 @@ namespace SpookyGame.D1Scene
     /// D1 场景管理器
     /// 进入场景显示开场对话，刮胡子后显示结束对话并切换场景
     /// </summary>
-    public class D1ProgressManager : MonoBehaviour
+    public class D1ProgressManager : MonoBehaviour, IEventHandler<TransitionFadeOutCompleteEvent>
     {
         [Header("Scene Object")]
         [Tooltip("刮胡子后显示的物体")]
@@ -64,23 +64,29 @@ namespace SpookyGame.D1Scene
                 objectA.SetActive(false);
             }
             
-            // 延迟显示开场对话，等待场景切换动画完成
-            StartCoroutine(WaitAndShowOpeningDialogue());
+            // 订阅转场淡出完成事件，等待黑幕淡出结束
+            EventBus.Subscribe<TransitionFadeOutCompleteEvent>(this);
+        }
+        
+        private void OnDestroy()
+        {
+            // 取消订阅
+            EventBus.Unsubscribe<TransitionFadeOutCompleteEvent>(this);
         }
         
         /// <summary>
-        /// 等待场景切换完成后显示开场对话
+        /// 处理转场淡出完成事件
         /// </summary>
-        private IEnumerator WaitAndShowOpeningDialogue()
+        public void Handle(TransitionFadeOutCompleteEvent eventData)
         {
-            yield return new WaitForSeconds(openingDialogueDelay);
-            
-            if (!_openingDialogueShown)
+            // 当转场淡出完成且当前在 D1 场景时，显示开场对话
+            if (eventData.StageId == "D1" && !_openingDialogueShown)
             {
                 _openingDialogueShown = true;
                 ShowOpeningDialogue();
             }
         }
+        
         
         private void Update()
         {
@@ -124,13 +130,19 @@ namespace SpookyGame.D1Scene
                 OnEndingDialogueComplete();
             }
         }
+
+        [SerializeField] private  // 使用多个过渡文字
+            string[] transitionTexts = new string[]
+            {
+                "Day 2"
+            };
         
         /// <summary>
         /// 结束对话完成后切换场景
         /// </summary>
         private void OnEndingDialogueComplete()
         {
-            SceneService.FadeToStage(nextStageId, stageChangeStr, 1f, stageChangeStr);
+            SceneService.FadeToStage(nextStageId, 1f, transitionTexts);
         }
     }
 }

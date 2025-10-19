@@ -14,7 +14,6 @@ namespace SpookyGame.UI
         [Header("UI References")]
         [SerializeField] private GameObject transitionPanel;
         [SerializeField] private Text transitionText;
-        [SerializeField] private Text clickPromptText;
         
         [Header("Typewriter Settings")]
         [SerializeField] private float typingSpeed = 0.05f;
@@ -24,17 +23,17 @@ namespace SpookyGame.UI
         [SerializeField] private float fadeInDuration = 0.5f;
         [SerializeField] private float fadeOutDuration = 0.5f;
         
-        [Header("Prompt Settings")]
-        [SerializeField] private string clickPromptMessage = "点击继续...";
-        [SerializeField] private float promptBlinkSpeed = 1f;
         
         private CanvasGroup _canvasGroup;
         private bool _isVisible = false;
         private bool _isTyping = false;
         private bool _isWaitingForClick = false;
         private Coroutine _typewriterCoroutine;
-        private Coroutine _blinkCoroutine;
         private System.Action _onComplete;
+        
+        // 多文字支持
+        private string[] _texts;
+        private int _currentTextIndex = 0;
         
         private void Awake()
         {
@@ -50,17 +49,12 @@ namespace SpookyGame.UI
             _canvasGroup.interactable = false;
             _canvasGroup.blocksRaycasts = false;
             transitionPanel.SetActive(false);
-            
-            // 隐藏点击提示
-            if (clickPromptText != null)
-            {
-                clickPromptText.gameObject.SetActive(false);
-            }
         }
         
         private void Start()
         {
             // 订阅过渡文字事件
+            Debug.Log("[TransitionTextUI] Subscribing to TransitionTextEvent");
             EventBus.Subscribe<TransitionTextEvent>(this);
         }
         
@@ -91,10 +85,11 @@ namespace SpookyGame.UI
         /// </summary>
         public void Handle(TransitionTextEvent eventData)
         {
-            Debug.Log("123123222");
+            Debug.Log($"[TransitionTextUI] Received TransitionTextEvent: Show={eventData.Show}, Texts={eventData.Texts?.Length ?? 0}");
+            
             if (eventData.Show)
             {
-                ShowTransitionText(eventData.Text, eventData.OnComplete);
+                ShowTransitionText(eventData.Texts, eventData.OnComplete);
             }
             else
             {
@@ -103,17 +98,27 @@ namespace SpookyGame.UI
         }
         
         /// <summary>
-        /// 显示过渡文字
+        /// 显示过渡文字（单个文字，兼容性方法）
         /// </summary>
         public void ShowTransitionText(string text, System.Action onComplete = null)
         {
-            if (string.IsNullOrEmpty(text))
+            ShowTransitionText(new string[] { text }, onComplete);
+        }
+        
+        /// <summary>
+        /// 显示过渡文字（多个文字）
+        /// </summary>
+        public void ShowTransitionText(string[] texts, System.Action onComplete = null)
+        {
+            if (texts == null || texts.Length == 0)
             {
-                Debug.LogWarning("[TransitionTextUI] Text is null or empty");
+                Debug.LogWarning("[TransitionTextUI] Texts is null or empty");
                 onComplete?.Invoke();
                 return;
             }
             
+            _texts = texts;
+            _currentTextIndex = 0;
             _onComplete = onComplete;
             _isVisible = true;
             _isWaitingForClick = false;
@@ -121,22 +126,16 @@ namespace SpookyGame.UI
             // 显示面板
             transitionPanel.SetActive(true);
             
-            // 隐藏点击提示
-            if (clickPromptText != null)
-            {
-                clickPromptText.gameObject.SetActive(false);
-            }
-            
             // 清空文字
             if (transitionText != null)
             {
                 transitionText.text = "";
             }
             
-            // 播放淡入动画
-            StartCoroutine(ShowSequence(text));
+            // 显示第一个文字
+            ShowCurrentText();
             
-            Debug.Log($"[TransitionTextUI] Showing transition text: {text}");
+            Debug.Log($"[TransitionTextUI] Showing transition texts: {texts.Length} texts");
         }
         
         /// <summary>
@@ -149,17 +148,15 @@ namespace SpookyGame.UI
             _isVisible = false;
             _isWaitingForClick = false;
             
+            // 重置多文字状态
+            _texts = null;
+            _currentTextIndex = 0;
+            
             // 停止所有协程
             if (_typewriterCoroutine != null)
             {
                 StopCoroutine(_typewriterCoroutine);
                 _typewriterCoroutine = null;
-            }
-            
-            if (_blinkCoroutine != null)
-            {
-                StopCoroutine(_blinkCoroutine);
-                _blinkCoroutine = null;
             }
             
             // 播放淡出动画
@@ -179,9 +176,6 @@ namespace SpookyGame.UI
             // 打字机效果
             _typewriterCoroutine = StartCoroutine(TypewriterEffect(text));
             yield return _typewriterCoroutine;
-            
-            // 显示点击提示
-            ShowClickPrompt();
             
             // 等待玩家点击
             _isWaitingForClick = true;
@@ -233,73 +227,136 @@ namespace SpookyGame.UI
         }
         
         /// <summary>
-        /// 显示点击提示
-        /// </summary>
-        private void ShowClickPrompt()
-        {
-            if (clickPromptText != null)
-            {
-                clickPromptText.text = clickPromptMessage;
-                clickPromptText.gameObject.SetActive(true);
-                
-                // 开始闪烁效果
-                _blinkCoroutine = StartCoroutine(BlinkPrompt());
-            }
-        }
-        
-        /// <summary>
-        /// 点击提示闪烁效果
-        /// </summary>
-        private IEnumerator BlinkPrompt()
-        {
-            if (clickPromptText == null) yield break;
-            
-            CanvasGroup promptGroup = clickPromptText.GetComponent<CanvasGroup>();
-            if (promptGroup == null)
-            {
-                promptGroup = clickPromptText.gameObject.AddComponent<CanvasGroup>();
-            }
-            
-            while (_isWaitingForClick)
-            {
-                // 淡出
-                float elapsed = 0f;
-                while (elapsed < promptBlinkSpeed / 2f)
-                {
-                    elapsed += Time.deltaTime;
-                    promptGroup.alpha = Mathf.Lerp(1f, 0.3f, elapsed / (promptBlinkSpeed / 2f));
-                    yield return null;
-                }
-                
-                // 淡入
-                elapsed = 0f;
-                while (elapsed < promptBlinkSpeed / 2f)
-                {
-                    elapsed += Time.deltaTime;
-                    promptGroup.alpha = Mathf.Lerp(0.3f, 1f, elapsed / (promptBlinkSpeed / 2f));
-                    yield return null;
-                }
-            }
-        }
-        
-        /// <summary>
         /// 玩家点击继续
         /// </summary>
         private void OnClickToContinue()
         {
             _isWaitingForClick = false;
             
-            // 停止闪烁
-            if (_blinkCoroutine != null)
-            {
-                StopCoroutine(_blinkCoroutine);
-                _blinkCoroutine = null;
-            }
-            
             Debug.Log("[TransitionTextUI] Player clicked to continue");
             
-            // 淡出并调用完成回调
-            StartCoroutine(FadeOutAndComplete());
+            // 检查是否还有下一个文字
+            if (_texts != null && _currentTextIndex < _texts.Length - 1)
+            {
+                // 切换到下一个文字（淡出当前文字，淡入下一个文字）
+                _currentTextIndex++;
+                StartCoroutine(TransitionToNextText());
+            }
+            else
+            {
+                // 所有文字显示完毕，只淡出文字，不淡出黑幕，立即调用完成回调
+                StartCoroutine(FadeOutTextAndComplete());
+            }
+        }
+        
+        /// <summary>
+        /// 显示当前文字
+        /// </summary>
+        private void ShowCurrentText()
+        {
+            if (_texts == null || _currentTextIndex >= _texts.Length)
+            {
+                Debug.LogWarning("[TransitionTextUI] No more texts to show");
+                StartCoroutine(FadeOutAndComplete());
+                return;
+            }
+            
+            string currentText = _texts[_currentTextIndex];
+            Debug.Log($"[TransitionTextUI] Showing text {_currentTextIndex + 1}/{_texts.Length}: {currentText}");
+            
+            // 如果是第一个文字，需要先淡入黑幕
+            if (_currentTextIndex == 0)
+            {
+                StartCoroutine(ShowSequence(currentText));
+            }
+            else
+            {
+                // 后续文字直接显示（黑幕已经存在）
+                StartCoroutine(ShowTextOnly(currentText));
+            }
+        }
+        
+        /// <summary>
+        /// 切换到下一个文字（淡出当前文字，淡入下一个文字）
+        /// </summary>
+        private IEnumerator TransitionToNextText()
+        {
+            // 淡出当前文字
+            if (transitionText != null)
+            {
+                yield return StartCoroutine(FadeOutText());
+            }
+            
+            // 显示下一个文字
+            ShowCurrentText();
+        }
+        
+        /// <summary>
+        /// 只显示文字（不包含黑幕淡入）
+        /// </summary>
+        private IEnumerator ShowTextOnly(string text)
+        {
+            // 设置文字内容
+            if (transitionText != null)
+            {
+                transitionText.text = text;
+            }
+            
+            // 淡入文字
+            yield return StartCoroutine(FadeInText());
+            
+            // 等待玩家点击
+            _isWaitingForClick = true;
+        }
+        
+        /// <summary>
+        /// 淡出文字
+        /// </summary>
+        private IEnumerator FadeOutText()
+        {
+            if (transitionText == null) yield break;
+            
+            float elapsed = 0f;
+            float duration = 0.3f; // 文字淡出时间
+            
+            Color startColor = transitionText.color;
+            Color endColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+            
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                transitionText.color = Color.Lerp(startColor, endColor, t);
+                yield return null;
+            }
+            
+            transitionText.color = endColor;
+        }
+        
+        /// <summary>
+        /// 淡入文字
+        /// </summary>
+        private IEnumerator FadeInText()
+        {
+            if (transitionText == null) yield break;
+            
+            float elapsed = 0f;
+            float duration = 0.3f; // 文字淡入时间
+            
+            Color startColor = new Color(transitionText.color.r, transitionText.color.g, transitionText.color.b, 0f);
+            Color endColor = new Color(startColor.r, startColor.g, startColor.b, 1f);
+            
+            transitionText.color = startColor;
+            
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                transitionText.color = Color.Lerp(startColor, endColor, t);
+                yield return null;
+            }
+            
+            transitionText.color = endColor;
         }
         
         /// <summary>
@@ -344,13 +401,50 @@ namespace SpookyGame.UI
         }
         
         /// <summary>
+        /// 只淡出文字并执行完成回调（不淡出黑幕）
+        /// </summary>
+        private IEnumerator FadeOutTextAndComplete()
+        {
+            // 只淡出文字
+            if (transitionText != null)
+            {
+                yield return StartCoroutine(FadeOutText());
+            }
+            
+            // 执行完成回调（让 SceneService 切换场景）
+            _onComplete?.Invoke();
+            _onComplete = null;
+            
+            // 等待一小段时间让场景切换完成，然后淡出黑幕
+            yield return new WaitForSeconds(0.1f);
+            
+            // 淡出黑幕
+            yield return StartCoroutine(FadeOut());
+            
+            _isVisible = false;
+            
+            // 发布转场淡出完成事件
+            EventBus.Publish(new TransitionFadeOutCompleteEvent(SceneService.CurrentStageId));
+        }
+        
+        /// <summary>
         /// 淡出并执行完成回调
         /// </summary>
         private IEnumerator FadeOutAndComplete()
         {
+            // 先淡出文字
+            if (transitionText != null)
+            {
+                yield return StartCoroutine(FadeOutText());
+            }
+            
+            // 再淡出黑幕
             yield return StartCoroutine(FadeOut());
             
             _isVisible = false;
+            
+            // 发布转场淡出完成事件
+            EventBus.Publish(new TransitionFadeOutCompleteEvent(SceneService.CurrentStageId));
             
             // 执行完成回调
             _onComplete?.Invoke();
@@ -361,6 +455,15 @@ namespace SpookyGame.UI
         /// 获取当前是否显示
         /// </summary>
         public bool IsVisible => _isVisible;
+        
+        /// <summary>
+        /// 测试方法：手动显示文字（用于调试）
+        /// </summary>
+        [ContextMenu("Test Show Text")]
+        public void TestShowText()
+        {
+            ShowTransitionText(new string[] { "第一段文字", "第二段文字", "第三段文字", "最后一段文字" }, () => Debug.Log("所有文字显示完成"));
+        }
     }
 }
 

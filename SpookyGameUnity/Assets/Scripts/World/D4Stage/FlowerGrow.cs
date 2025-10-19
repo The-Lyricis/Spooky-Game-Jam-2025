@@ -64,7 +64,7 @@ public class FlowerGrow : Interactable
     IEnumerator ChangeStage()
     {
         yield return new WaitForSeconds(3f);
-        SceneService.FadeToStage(targetStageId,"",1f,"123");
+        SceneService.FadeToStage(targetStageId, 1f, new string[] { "Day 5" });
     }
     
     /// <summary>
@@ -75,7 +75,7 @@ public class FlowerGrow : Interactable
         flowerGameObject.SetActive(true);
         this.gameObject.GetComponent<SpriteRenderer>().enabled = false;
         // _spriteRenderer.sprite = flowerSprite;
-        // SceneService.FadeToStage(targetStageId,"",1f,"123");
+        // SceneService.FadeToStage(targetStageId, 1f, new string[] { "123" });
 
     }
 }

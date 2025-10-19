@@ -297,88 +297,58 @@ namespace SpookyGame.Core
         }
         
         /// <summary>
-        /// 使用过渡文字或黑幕转场切换关卡
+        /// 使用过渡文字转场切换关卡
         /// </summary>
         /// <param name="stageId">关卡 ID</param>
-        /// <param name="intertitle">转场标题文字（可选，仅在无过渡文字时使用）</param>
         /// <param name="fadeDuration">淡入淡出时长</param>
-        /// <param name="transitionText">过渡文字（可选，如果提供则使用过渡文字而非黑幕）</param>
-        public static void FadeToStage(string stageId, string intertitle = "", float fadeDuration = 1f, string transitionText = null)
+        /// <param name="transitionTexts">过渡文字数组（可选）</param>
+        public static void FadeToStage(string stageId, float fadeDuration = 1f, string[] transitionTexts = null)
         {
             if (!_isInitialized)
             {
                 Debug.LogError("[SceneService] Not initialized. Call Initialize() first.");
                 return;
             }
-            
+
             if (_coroutineRunner == null)
             {
                 Debug.LogWarning("[SceneService] No coroutine runner, falling back to direct activation");
                 ActivateStage(stageId);
                 return;
             }
-            
-            _coroutineRunner.StartCoroutine(FadeToStageCoroutine(stageId, intertitle, fadeDuration, transitionText));
+
+            // 强制要求有文字（按你需求去掉无文字写法）
+            if (transitionTexts == null || transitionTexts.Length == 0)
+            {
+                transitionTexts = new[] { "" }; // 或者给个默认标题，比如 "Day 1"
+            }
+
+            _coroutineRunner.StartCoroutine(FadeToStageCoroutine(stageId, fadeDuration, transitionTexts));
         }
         
         /// <summary>
-        /// 黑幕转场协程
+        /// 黑幕转场协程（支持多个过渡文字）
         /// </summary>
-        private static IEnumerator FadeToStageCoroutine(string stageId, string intertitle, float fadeDuration, string transitionText = null)
+        private static IEnumerator FadeToStageCoroutine(string stageId, float fadeDuration, string[] transitionTexts)
         {
-            Debug.Log($"[SceneService] Fading to stage: {stageId}, transitionText: {transitionText}");
-            
-            // 如果有过渡文字，使用过渡文字方式
-            if (!string.IsNullOrEmpty(transitionText))
-            {
-                bool transitionComplete = false;
-                
-                // 显示过渡文字
-                EventBus.Publish(new TransitionTextEvent(transitionText, true, () =>
-                {
-                    transitionComplete = true;
-                }));
-                
-                // 等待过渡文字淡入完成后立即切换场景
-                yield return new WaitForSeconds(0.5f); // 等待过渡UI淡入
-                
-                // 在过渡文字显示时切换关卡
-                ActivateStage(stageId);
-                Debug.Log($"[SceneService] Stage switched to {stageId} while showing transition text");
-                
-                // 等待玩家点击完成
-                yield return new WaitUntil(() => transitionComplete);
-                Debug.Log($"[SceneService] Transition to {stageId} completed");
-            }
-            else
-            {
-                // 没有过渡文字，使用传统黑幕转场
-                // 发布转场开始事件
-                EventBus.Publish(new FadeStartedEvent(true, fadeDuration));
-                
-                // 等待淡入完成
-                yield return new WaitForSeconds(fadeDuration);
-                
-                // 显示标题文字
-                if (!string.IsNullOrEmpty(intertitle))
-                {
-                    EventBus.Publish(new IntertitleEvent(intertitle, true));
-                    yield return new WaitForSeconds(2f); // 显示 2 秒
-                    EventBus.Publish(new IntertitleEvent(intertitle, false));
-                }
-                
-                
-                
-                // 淡出黑幕
-                EventBus.Publish(new FadeStartedEvent(false, fadeDuration));
-                
-                yield return new WaitForSeconds(fadeDuration);
+            Debug.Log($"[SceneService] Fading to stage (text-first): {stageId}, texts: {transitionTexts.Length}");
 
-                // 切换关卡
+            // 1) 先淡入到黑屏（保持老场景，不暴露新场景）
+            EventBus.Publish(new FadeStartedEvent(true, fadeDuration));
+            yield return new WaitForSeconds(fadeDuration);
+
+            // 2) 黑屏上显示过渡文字，等待玩家点击
+            bool transitionComplete = false;
+            EventBus.Publish(new TransitionTextEvent(transitionTexts, true, () => { 
+                // 在玩家点击完成时立即切换场景
                 ActivateStage(stageId);
-                
-                Debug.Log($"[SceneService] Fade transition to {stageId} completed");
-            }
+                Debug.Log($"[SceneService] Stage switched to {stageId} after transition text confirmed");
+                transitionComplete = true; 
+            }));
+            yield return new WaitUntil(() => transitionComplete);
+
+            // 3) TransitionTextUI 会自己处理黑幕淡出，我们不需要额外操作
+            Debug.Log($"[SceneService] Fade transition to {stageId} completed");
         }
         
         /// <summary>
@@ -514,15 +484,36 @@ namespace SpookyGame.Core
     /// </summary>
     public class TransitionTextEvent : IEvent
     {
-        public string Text { get; }
+        public string[] Texts { get; }
         public bool Show { get; }
         public System.Action OnComplete { get; }
         
-        public TransitionTextEvent(string text, bool show, System.Action onComplete = null)
+        public TransitionTextEvent(string[] texts, bool show, System.Action onComplete = null)
         {
-            Text = text;
+            Texts = texts;
             Show = show;
             OnComplete = onComplete;
+        }
+        
+        // 兼容性构造函数：单个文字
+        public TransitionTextEvent(string text, bool show, System.Action onComplete = null)
+        {
+            Texts = new string[] { text };
+            Show = show;
+            OnComplete = onComplete;
+        }
+    }
+    
+    /// <summary>
+    /// 转场淡出完成事件
+    /// </summary>
+    public class TransitionFadeOutCompleteEvent : IEvent
+    {
+        public string StageId { get; }
+        
+        public TransitionFadeOutCompleteEvent(string stageId)
+        {
+            StageId = stageId;
         }
     }
 }

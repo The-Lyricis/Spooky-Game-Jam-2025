@@ -40,6 +40,13 @@ namespace SpookyGame.D0Scene
         [Tooltip("对话结束后切换的关卡")]
         [SerializeField] private string nextStageId = "D1";
         
+        [Tooltip("场景切换提示文字")]
+        [SerializeField] private  // 使用多个过渡文字
+            string[] transitionTexts = new string[]
+            {
+                "Day 1"
+            };
+        
         private int _lastInspectionCount = 0;
         private bool _dialogueTriggered = false;
         
@@ -129,14 +136,14 @@ namespace SpookyGame.D0Scene
             }
         }
         
-        [SerializeField] private string StagechangeStr = "第一关完成，即将进入第二关";
-        
         /// <summary>
         /// 对话完成时的回调
         /// </summary>
         private void OnDialogueComplete()
         {
-            SceneService.FadeToStage(nextStageId, StagechangeStr, 1f, StagechangeStr);
+           
+            
+            SceneService.FadeToStage(nextStageId, 1f, transitionTexts);
         }
     }
 }
