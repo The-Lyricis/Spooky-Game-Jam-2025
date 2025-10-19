@@ -361,13 +361,15 @@ namespace SpookyGame.Core
                     EventBus.Publish(new IntertitleEvent(intertitle, false));
                 }
                 
-                // 切换关卡
-                ActivateStage(stageId);
+                
                 
                 // 淡出黑幕
                 EventBus.Publish(new FadeStartedEvent(false, fadeDuration));
                 
                 yield return new WaitForSeconds(fadeDuration);
+
+                // 切换关卡
+                ActivateStage(stageId);
                 
                 Debug.Log($"[SceneService] Fade transition to {stageId} completed");
             }

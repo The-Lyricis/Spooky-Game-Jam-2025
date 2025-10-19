@@ -1,11 +1,11 @@
 using UnityEngine;
 using SpookyGame.Core;
-using System.ComponentModel.Design;
+using SpookyGame.UI;
 
 namespace SpookyGame.World
 {
     /// <summary>
-    /// 胡子 - 需要剃刀，点击后切换场景
+    /// 胡子 - 需要剃刀，点击后设置 flag
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class Beard : Interactable
@@ -19,9 +19,11 @@ namespace SpookyGame.World
         [SerializeField] private Animator animator;
         [SerializeField] private string animTrigger = "Shave";
         
-        [Header("Stage Transition")]
-        [Tooltip("目标场景")]
-        [SerializeField] private string targetStageId = "D2";
+        [Header("Progress Flag")]
+        [Tooltip("完成后设置的 flag")]
+        [SerializeField] private string completionFlag = "d1.beard_shaved";
+        
+        private bool _hasInteracted = false;
         
         /// <summary>
         /// 动态提示
@@ -49,15 +51,10 @@ namespace SpookyGame.World
         {
             if (!base.CanInteract(actor)) return false;
             
-            // 检查是否持有剃刀
-            string held = FlagService.GetHeldItem();
-            if (held != "razor")
-            {
-                Debug.Log("[Beard] 需要剃刀才能刮胡子");
-                return false;
-            }
+            if (_hasInteracted) return false;
             
-            return true;
+            string held = FlagService.GetHeldItem();
+            return held == "razor";
         }
         
         /// <summary>
@@ -65,27 +62,22 @@ namespace SpookyGame.World
         /// </summary>
         protected override void OnInteract(GameObject actor)
         {
-            Debug.Log("[Beard] 刮胡子");
+            if (_hasInteracted) return;
             
-            // 播放动画
+            _hasInteracted = true;
+            
             if (animator != null && !string.IsNullOrEmpty(animTrigger))
             {
                 animator.SetTrigger(animTrigger);
             }
             
-            // 播放音效
             if (audioSource != null && shaveSfx != null)
             {
                 audioSource.PlayOneShot(shaveSfx);
             }
             
-            // 切换场景
-            Debug.Log($"[Beard] 切换到场景: {targetStageId}");
-            SceneService.FadeToStage(targetStageId,"",1f,"123");
-            // SceneService.FadeToStage(stageId: targetStageId,
-            // intertitle: "第二关",
-            // fadeDuration: 1f,
-            // transitionText: "你推开了沉重的大门...\n\n里面是一片漆黑。");
+            // 设置 flag，由 D1ProgressManager 处理后续对话和场景切换
+            FlagService.SetFlag(completionFlag, true);
         }
     }
 }
