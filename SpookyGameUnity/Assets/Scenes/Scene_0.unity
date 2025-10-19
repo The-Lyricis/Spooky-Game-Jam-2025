@@ -392,10 +392,10 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1430525572}
   - {fileID: 115908967}
   - {fileID: 1171159805}
   - {fileID: 1261952350}
+  - {fileID: 1430525572}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -619,7 +619,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 965a5dc2aa919f14480231d05b18d542, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0f2afb9eaa2846b49be5632e233797d4, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1573,10 +1573,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: Stage_D0
       objectReference: {fileID: 0}
+    - target: {fileID: 747077456188206660, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
+      propertyPath: randomStartPosition
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2376079876523559568, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
+      propertyPath: randomStartPosition
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2653123703075681091, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
       propertyPath: dialogueSystem
       value: 
       objectReference: {fileID: 1191206759}
+    - target: {fileID: 6623044045596323809, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
+      propertyPath: faceDirection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6623044045596323809, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
+      propertyPath: randomStartPosition
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7856780464058768158, guid: e1b216a2c5269134ab9d626aacff0269, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.65

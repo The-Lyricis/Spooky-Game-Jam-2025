@@ -50,7 +50,15 @@ namespace SpookyGame.D0Scene
         
         private IEnumerator StartDialogueAfterFrame()
         {
+            // 等待鼠标释放，避免点击照片的操作被对话系统检测到
+            while (UnityEngine.Input.GetMouseButton(0))
+            {
+                yield return null;
+            }
+            
+            // 再等待一帧确保状态稳定
             yield return null;
+            
             dialogueSystem.StartDialogue(dialogueLines, OnDialogueComplete);
         }
         

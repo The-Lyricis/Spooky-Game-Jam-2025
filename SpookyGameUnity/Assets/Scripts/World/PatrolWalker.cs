@@ -26,6 +26,15 @@ namespace SpookyGame.World
         [Tooltip("是否朝向移动方向（翻转 Sprite）")]
         [SerializeField] private bool faceDirection = true;
         
+        [Tooltip("启动时随机初始位置（模拟已经走了一段距离）")]
+        [SerializeField] private bool randomStartPosition = false;
+        
+        [Tooltip("随机位置范围（0=起点，1=终点）")]
+        [SerializeField] [Range(0f, 1f)] private float randomPositionMin = 0f;
+        
+        [Tooltip("随机位置范围（0=起点，1=终点）")]
+        [SerializeField] [Range(0f, 1f)] private float randomPositionMax = 1f;
+        
         [Header("Fade Settings")]
         [Tooltip("是否启用淡入淡出效果")]
         [SerializeField] private bool enableFade = true;
@@ -130,7 +139,19 @@ namespace SpookyGame.World
         {
             if (_isWalking) return;
             
-            transform.position = _worldStartPoint;
+            // 设置初始位置
+            if (randomStartPosition)
+            {
+                // 随机位置在路径上
+                float t = Random.Range(randomPositionMin, randomPositionMax);
+                transform.position = Vector3.Lerp(_worldStartPoint, _worldEndPoint, t);
+            }
+            else
+            {
+                // 固定从起点开始
+                transform.position = _worldStartPoint;
+            }
+            
             _targetPosition = _worldEndPoint;
             _isWalking = true;
             
