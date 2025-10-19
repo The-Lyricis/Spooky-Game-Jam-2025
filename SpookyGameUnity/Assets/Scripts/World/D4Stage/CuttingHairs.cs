@@ -35,7 +35,7 @@ public class CuttingHairs : Interactable
     {
         if (!base.CanInteract(actor)) return false;
         string held = FlagService.GetHeldItem();
-        if (held != "Hairs")
+        if (held != "Scissor")
         {
             return false;
         }
@@ -49,7 +49,7 @@ public class CuttingHairs : Interactable
     /// </summary>
     protected override void OnInteract(GameObject actor)
     {
-        if(Index<=4)
+        if(Index<4)
         {
             ChangeSprite();
             // 播放音效
@@ -69,10 +69,11 @@ public class CuttingHairs : Interactable
     /// </summary>
     private void ChangeSprite()
     {
+        Debug.Log(Index);
         foreach (var hair in hairGameObject)
         {
             hair.SetActive(false);
         }
-        hairGameObject[++Index].SetActive(true);
+        hairGameObject[Index++].SetActive(true);
     }
 }

@@ -15,6 +15,7 @@ public class FlowerGrow : Interactable
     [Header("Sprite Settings")]
     [Tooltip("花的不同状态图片")]
     [SerializeField] private Sprite flowerSprite;
+    [SerializeField] private GameObject flowerGameObject;
     
     private SpriteRenderer _spriteRenderer;
     private int _currentSpriteIndex = 0;
@@ -58,6 +59,12 @@ public class FlowerGrow : Interactable
         {
             audioSource.PlayOneShot(interactSfx);
         }
+        StartCoroutine(ChangeStage());
+    }
+    IEnumerator ChangeStage()
+    {
+        yield return new WaitForSeconds(3f);
+        SceneService.FadeToStage(targetStageId,"",1f,"123");
     }
     
     /// <summary>
@@ -65,8 +72,10 @@ public class FlowerGrow : Interactable
     /// </summary>
     private void ChangeSprite()
     {
-        _spriteRenderer.sprite = flowerSprite;
-        SceneService.FadeToStage(targetStageId,"",1f,"123");
+        flowerGameObject.SetActive(true);
+        this.gameObject.GetComponent<SpriteRenderer>().enabled = false;
+        // _spriteRenderer.sprite = flowerSprite;
+        // SceneService.FadeToStage(targetStageId,"",1f,"123");
 
     }
 }
