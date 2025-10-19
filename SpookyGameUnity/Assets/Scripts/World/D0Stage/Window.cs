@@ -32,59 +32,26 @@ namespace SpookyGame.D0Scene
         {
             base.Awake();
             
-            // 自动查找对话系统
             if (autoFindDialogueSystem && dialogueSystem == null)
             {
                 dialogueSystem = FindObjectOfType<DialogueSystem>();
-                if (dialogueSystem == null)
-                {
-                    Debug.LogError("[Window] DialogueSystem not found in scene! Please add a DialogueSystem component.", gameObject);
-                }
-                else
-                {
-                    Debug.Log($"[Window] Auto-found DialogueSystem");
-                }
-            }
-            
-            // 验证配置
-            if (dialogueSystem == null)
-            {
-                Debug.LogError("[Window] DialogueSystem is not assigned! Window dialogue will not work.", gameObject);
             }
         }
         
         protected override void OnInteract(GameObject actor)
         {
-            if (_hasInteracted)
+            if (_hasInteracted || dialogueSystem == null)
             {
-                Debug.Log("[Window] Already interacted.");
                 return;
             }
             
-            if (dialogueSystem == null)
-            {
-                Debug.LogError("[Window] DialogueSystem is not assigned!", gameObject);
-                return;
-            }
-            
-            Debug.Log("[Window] Starting dialogue...");
-            
-            // 使用对话系统，传入完成回调
             dialogueSystem.StartDialogue(dialogueLines, OnDialogueComplete);
-            
             _hasInteracted = true;
         }
         
-        /// <summary>
-        /// 对话完成时的回调
-        /// </summary>
         private void OnDialogueComplete()
         {
-            Debug.Log("[Window] Dialogue complete.");
-            
-            // 设置交互旗标（用于触发进度）
             FlagService.SetFlag("inspected.window", true);
-            Debug.Log("[Window] Set flag: inspected.window = true");
         }
     }
 }

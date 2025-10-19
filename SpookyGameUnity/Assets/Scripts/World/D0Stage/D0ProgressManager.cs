@@ -45,38 +45,23 @@ namespace SpookyGame.D0Scene
         
         private void Start()
         {
-            // 自动查找对话系统
             if (autoFindDialogueSystem && dialogueSystem == null)
             {
                 dialogueSystem = FindObjectOfType<DialogueSystem>();
-                if (dialogueSystem == null)
-                {
-                    Debug.LogError("[D0ProgressManager] DialogueSystem not found in scene! Please add a DialogueSystem component.");
-                }
-                else
-                {
-                    Debug.Log("[D0ProgressManager] Auto-found DialogueSystem");
-                }
             }
             
-            // 初始化：显示 ObjectA
             UpdateObjects();
-            
-            Debug.Log("[D0ProgressManager] Initialized. Waiting for inspections...");
         }
         
         private void Update()
         {
-            // 检查检视进度
             int currentCount = GetInspectionCount();
             
             if (currentCount != _lastInspectionCount)
             {
-                Debug.Log($"[D0ProgressManager] Inspection count: {_lastInspectionCount} → {currentCount}");
                 _lastInspectionCount = currentCount;
                 UpdateObjects();
                 
-                // 检视完 2 个后触发对话
                 if (currentCount == 2 && !_dialogueTriggered)
                 {
                     _dialogueTriggered = true;
@@ -113,27 +98,22 @@ namespace SpookyGame.D0Scene
         {
             int count = _lastInspectionCount;
             
-            // 先隐藏所有物体
             if (objectA != null) objectA.SetActive(false);
             if (objectB != null) objectB.SetActive(false);
             if (objectC != null) objectC.SetActive(false);
             
-            // 再根据检视数量显示对应物体
             switch (count)
             {
                 case 0:
                     if (objectA != null) objectA.SetActive(true);
-                    Debug.Log($"[D0ProgressManager] Showing ObjectA");
                     break;
                 
                 case 1:
                     if (objectB != null) objectB.SetActive(true);
-                    Debug.Log($"[D0ProgressManager] A hidden → B enabled");
                     break;
                 
                 case 2:
                     if (objectC != null) objectC.SetActive(true);
-                    Debug.Log($"[D0ProgressManager] B hidden → C enabled");
                     break;
             }
         }
@@ -143,27 +123,20 @@ namespace SpookyGame.D0Scene
         /// </summary>
         private void TriggerFinalDialogue()
         {
-            if (dialogueSystem == null)
+            if (dialogueSystem != null)
             {
-                Debug.LogError("[D0ProgressManager] DialogueSystem is not assigned! Cannot start dialogue.");
-                return;
+                dialogueSystem.StartDialogue(dialogueLines, OnDialogueComplete);
             }
-            
-            Debug.Log("[D0ProgressManager] Starting final dialogue...");
-            
-            // 使用对话系统，传入完成回调
-            dialogueSystem.StartDialogue(dialogueLines, OnDialogueComplete);
         }
+        
         [SerializeField] private string StagechangeStr = "第一关完成，即将进入第二关";
+        
         /// <summary>
         /// 对话完成时的回调
         /// </summary>
         private void OnDialogueComplete()
         {
-            Debug.Log("[D0ProgressManager] Dialogue complete. Switching to next stage...");
-            
-            // 切换到下一关
-            SceneService.FadeToStage(nextStageId,"",1f,StagechangeStr);
+            SceneService.FadeToStage(nextStageId, StagechangeStr, 1f, StagechangeStr);
         }
     }
 }

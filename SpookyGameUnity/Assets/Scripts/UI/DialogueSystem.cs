@@ -23,9 +23,6 @@ namespace SpookyGame.UI
         [Tooltip("自动查找 UI（如果未手动赋值）")]
         [SerializeField] private bool autoFindUI = true;
         
-        [Tooltip("是否启用调试日志")]
-        [SerializeField] private bool enableDebugLog = true;
-        
         [Header("Typewriter Settings")]
         [Tooltip("是否启用打字机效果")]
         [SerializeField] private bool enableTypewriter = true;
@@ -65,40 +62,19 @@ namespace SpookyGame.UI
         
         private void Awake()
         {
-            // 自动查找 UI
             if (autoFindUI)
             {
                 if (dialoguePanel == null)
                 {
                     dialoguePanel = GameObject.Find("DialoguePanel");
-                    if (dialoguePanel != null && enableDebugLog)
-                    {
-                        Debug.Log($"[DialogueSystem] Auto-found DialoguePanel: {dialoguePanel.name}");
-                    }
                 }
                 
                 if (dialogueText == null && dialoguePanel != null)
                 {
                     dialogueText = dialoguePanel.GetComponentInChildren<Text>();
-                    if (dialogueText != null && enableDebugLog)
-                    {
-                        Debug.Log("[DialogueSystem] Auto-found DialogueText");
-                    }
                 }
             }
             
-            // 验证配置
-            if (dialoguePanel == null)
-            {
-                Debug.LogError("[DialogueSystem] DialoguePanel is not assigned! Dialogue will not work.", this);
-            }
-            
-            if (dialogueText == null)
-            {
-                Debug.LogError("[DialogueSystem] DialogueText is not assigned! Text will not display.", this);
-            }
-            
-            // 初始隐藏对话面板
             if (dialoguePanel != null)
             {
                 dialoguePanel.SetActive(false);
@@ -177,47 +153,25 @@ namespace SpookyGame.UI
         /// <param name="onComplete">对话完成时的回调（可选）</param>
         public void StartDialogue(string[] lines, Action onComplete = null)
         {
-            if (lines == null || lines.Length == 0)
+            if (lines == null || lines.Length == 0 || dialoguePanel == null || dialogueText == null)
             {
-                Debug.LogWarning("[DialogueSystem] Dialogue lines are empty!");
                 onComplete?.Invoke();
                 return;
             }
             
-            if (dialoguePanel == null || dialogueText == null)
-            {
-                Debug.LogError("[DialogueSystem] UI not set up! Cannot start dialogue.", this);
-                onComplete?.Invoke();
-                return;
-            }
-            
-            // 如果已有对话在进行，先结束
             if (_isDialogueActive)
             {
-                if (enableDebugLog)
-                {
-                    Debug.LogWarning("[DialogueSystem] Another dialogue is already active. Ending it first.");
-                }
-                EndDialogue(false); // 不触发回调
+                EndDialogue(false);
             }
             
-            // 初始化对话
             _currentDialogueLines = lines;
             _currentLineIndex = 0;
             _isDialogueActive = true;
-            _skipNextClick = true; // 跳过启动对话时的点击
+            _skipNextClick = true;
             _onDialogueComplete = onComplete;
             
-            // 显示对话面板
             dialoguePanel.SetActive(true);
-            
-            // 显示第一行
             ShowCurrentLine();
-            
-            if (enableDebugLog)
-            {
-                Debug.Log($"[DialogueSystem] Dialogue started with {lines.Length} lines");
-            }
         }
         
         /// <summary>
@@ -254,7 +208,6 @@ namespace SpookyGame.UI
                 string line = _currentDialogueLines[_currentLineIndex];
                 _fullText = line;
                 
-                // 停止之前的打字机效果
                 if (_typewriterCoroutine != null)
                 {
                     StopCoroutine(_typewriterCoroutine);
@@ -263,19 +216,12 @@ namespace SpookyGame.UI
                 
                 if (enableTypewriter && !string.IsNullOrEmpty(line))
                 {
-                    // 启动打字机效果
                     _typewriterCoroutine = StartCoroutine(TypewriterEffect(line));
                 }
                 else
                 {
-                    // 直接显示全部文字
                     dialogueText.text = line;
                     _isTyping = false;
-                }
-                
-                if (enableDebugLog)
-                {
-                    Debug.Log($"[DialogueSystem] Line {_currentLineIndex + 1}/{_currentDialogueLines.Length}: {line}");
                 }
             }
         }
@@ -320,11 +266,6 @@ namespace SpookyGame.UI
             
             _isTyping = false;
             _typewriterCoroutine = null;
-            
-            if (enableDebugLog)
-            {
-                Debug.Log("[DialogueSystem] Typewriter effect completed.");
-            }
         }
         
         /// <summary>
@@ -340,11 +281,6 @@ namespace SpookyGame.UI
             
             dialogueText.text = _fullText;
             _isTyping = false;
-            
-            if (enableDebugLog)
-            {
-                Debug.Log("[DialogueSystem] Typewriter effect skipped.");
-            }
         }
         
         /// <summary>
@@ -353,14 +289,8 @@ namespace SpookyGame.UI
         /// <param name="invokeCallback">是否触发完成回调</param>
         private void EndDialogue(bool invokeCallback)
         {
-            if (enableDebugLog)
-            {
-                Debug.Log("[DialogueSystem] Dialogue ended.");
-            }
-            
             _isDialogueActive = false;
             
-            // 停止打字机效果
             if (_typewriterCoroutine != null)
             {
                 StopCoroutine(_typewriterCoroutine);
@@ -368,23 +298,16 @@ namespace SpookyGame.UI
             }
             _isTyping = false;
             
-            // 隐藏对话面板
             if (dialoguePanel != null)
             {
                 dialoguePanel.SetActive(false);
             }
             
-            // 触发回调
             if (invokeCallback && _onDialogueComplete != null)
             {
-                if (enableDebugLog)
-                {
-                    Debug.Log("[DialogueSystem] Invoking completion callback.");
-                }
                 _onDialogueComplete.Invoke();
             }
             
-            // 清理
             _currentDialogueLines = null;
             _onDialogueComplete = null;
             _fullText = "";
