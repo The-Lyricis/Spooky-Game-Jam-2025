@@ -670,8 +670,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   showDebugInfo: 1
-  normalCursor: {fileID: 2800000, guid: c4da8f1f039d032468f11b92246486b6, type: 3}
-  hoverCursor: {fileID: 2800000, guid: 412fe727ef9d06443927d87dd5242c00, type: 3}
+  normalCursor: {fileID: 0}
+  hoverCursor: {fileID: 0}
   cursorHotspot: {x: 3, y: 3}
 --- !u!4 &972011500
 Transform:
@@ -743,6 +743,8 @@ MonoBehaviour:
   BirdIcon: {fileID: 21300000, guid: fc715af499648b34e9905e23d781da02, type: 3}
   BirdSkullIcon: {fileID: 21300000, guid: 31b68b633b6161e4e8f2863b401eef6e, type: 3}
   TeethIcon: {fileID: 21300000, guid: ffa6c700c110be84cbc6d78e7cbcf5e5, type: 3}
+  HairsIcon: {fileID: 0}
+  ScissorIcon: {fileID: 0}
   hideWhenEmpty: 1
 --- !u!1 &1191206757
 GameObject:
@@ -791,7 +793,6 @@ MonoBehaviour:
   dialoguePanel: {fileID: 1430525569}
   dialogueText: {fileID: 2007002179}
   autoFindUI: 1
-  enableDebugLog: 1
   enableTypewriter: 1
   typewriterSpeed: 21
   canSkipTypewriter: 1
@@ -1673,6 +1674,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Stage_D2
       objectReference: {fileID: 0}
+    - target: {fileID: 6138922631633173318, guid: ce88df90e50e64344a37e9f1b2f46878, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1689,6 +1694,10 @@ PrefabInstance:
     - target: {fileID: 36804524205743741, guid: 2b100a277171591459707abbdf94c74e, type: 3}
       propertyPath: m_Name
       value: Stage_D1
+      objectReference: {fileID: 0}
+    - target: {fileID: 36804524205743741, guid: 2b100a277171591459707abbdf94c74e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1816477860806951337, guid: 2b100a277171591459707abbdf94c74e, type: 3}
       propertyPath: m_LocalPosition.x
